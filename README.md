@@ -7,9 +7,7 @@ MatPsi: An interface between Matlab and Psi4
 
 Usage is (nearly) all of Matlab convention, except that all the function __input arguments__ have to be in a cell array: 
 
-    ```
     >> [output1, output2, ...] = matpsi.WhatEverFunction( {input1, input2, ...} );
-    ```
 
 This is assumed by "Example MATLAB class wrapper for a C++ class"'s developer Oliver Woodford. See http://http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
 
