@@ -34,9 +34,7 @@ Usually, we construct a MatPsi object using 2 strings, one describing the molecu
 
 Construct from an existing MatPsi object. 
 
-    ```
     >> matpsi2 = matpsi.MatPsiCopy();
-    ```
 
 ###Molecule and basis set properties 
 
