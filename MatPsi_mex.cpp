@@ -1,6 +1,7 @@
 #include "mex.h"
 #include "class_handle.hpp"
-#include "MatPsi.hpp"
+#include "MatPsi.h"
+#include "MatPsi.cc"
 
 using namespace std;
 using namespace psi;
