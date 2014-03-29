@@ -77,9 +77,13 @@ public:
 	
     // copy constructor 
 	MatPsi(boost::shared_ptr<MatPsi> inputMatPsi) {
+        natom_ = inputMatPsi->natom_;
+        nbasis_ = inputMatPsi->nbasis_;
+        nelec_ = inputMatPsi->nelec_;
 		molecule_ = inputMatPsi->molecule_;
 		basis_ = inputMatPsi->basis_;
 		intfac_ = inputMatPsi->intfac_;
+        eri_ = inputMatPsi->eri_;
 		matfac_ = inputMatPsi->matfac_;
 	}
 	
