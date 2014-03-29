@@ -13,22 +13,24 @@ This is assumed by _Example MATLAB class wrapper for a C++ class_ 's developer O
 
 Usually, we construct a MatPsi object using 2 strings, one describing the molecule's geometry, and one set the name of the basis set we are going to use. 
 
-    mol_string = 
+```
+mol_string = 
 
-    O
-    H 1 R
-    H 1 R 2 A
+O
+H 1 R
+H 1 R 2 A
 
-    R = .9
-    A = 104.5
+R = .9
+A = 104.5
 
-    basis_name = 
+basis_name = 
 
-    6-31g*
+6-31g*
 
-    >> matpsi = MatPsi( {mol_string, basis_name} );
+>> matpsi = MatPsi( {mol_string, basis_name} );
+```
 
-    Notice that both strings are in a cell array. 
+Notice that both strings are in a cell array. 
 
 ###Copy Constructor
 
