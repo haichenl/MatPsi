@@ -28,7 +28,7 @@ Usually, we construct a MatPsi object using 2 strings, one describing the molecu
 
     >> matpsi = MatPsi( {mol_string, basis_name} );
 
-Notice that both strings are in a cell array. 
+    Notice that both strings are in a cell array. 
 
 ###Copy Constructor
 
@@ -90,7 +90,7 @@ Construct from an existing MatPsi object.
     >> matpsi.tei_ijkl( {i, j, k, l} ); 
     ```
 
-Notice that all indices are in a cell array. 
+    Notice that all indices are in a cell array. 
 
 #TODO 
 
