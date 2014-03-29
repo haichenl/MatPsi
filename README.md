@@ -7,7 +7,7 @@ Usage is (nearly) all of Matlab convention, except that all the function __input
 
     >> [output1, output2, ...] = matpsi.WhatEverFunction( {input1, input2, ...} );
 
-This is assumed by "Example MATLAB class wrapper for a C++ class"'s developer Oliver Woodford. See http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
+This is assumed by _Example MATLAB class wrapper for a C++ class_'s developer Oliver Woodford. See http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
 
 ###Constructor 
 
