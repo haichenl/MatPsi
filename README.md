@@ -3,7 +3,7 @@ MatPsi: An interface between Matlab and Psi4
 
 #Usage 
 
-Usage is (nearly) all of Matlab convention, except that all the function __input arguments__ have to be in a cell array: 
+Usage is (nearly) all of Matlab convention, except that all the function __input arguments__ have to be in __one cell array__: 
 
     >> [output1, output2, ...] = matpsi.WhatEverFunction( {input1, input2, ...} );
 
