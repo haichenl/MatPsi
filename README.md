@@ -26,7 +26,9 @@ Usually, we construct a MatPsi object using 2 strings, one describing the molecu
 
     6-31g*
 
-    >> matpsi = MatPsi({mol_string, basis_name});
+    >> matpsi = MatPsi( {mol_string, basis_name} );
+
+Notice that both strings are in a cell array. 
 
 ###Copy Constructor
 
@@ -85,8 +87,10 @@ Construct from an existing MatPsi object.
 1. tei_ijkl: 4-indexed two electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
 
     ```
-    >> matpsi.tei_ijkl({i, j, k, l}); 
+    >> matpsi.tei_ijkl( {i, j, k, l} ); 
     ```
+
+Notice that all indices are in a cell array. 
 
 #TODO 
 
