@@ -15,8 +15,6 @@ This is assumed by "Example MATLAB class wrapper for a C++ class"'s developer Ol
 
 Usually, we construct a MatPsi object using 2 strings, one describing the molecule's geometry, and one set the name of the basis set we are going to use. 
 
-example: 
-
     mol_string = 
 
     O
@@ -36,47 +34,63 @@ example:
 
 Construct from an existing MatPsi object. 
 
-example:
-
+    ```
     >> matpsi2 = matpsi.MatPsiCopy();
+    ```
 
 ###Molecule and basis set properties 
 
 1. natom: number of atoms. 
 
+    ```
     >> matpsi.natom(); 
+    ```
 
 2. nbasis: number of basis functions. 
 
+    ```
     >> matpsi.nbasis(); 
+    ```
 
 3. nelec: number of electrons. 
 
+    ```
     >> matpsi.nelec(); 
+    ```
 
 ###One electron integrals 
 
 1. overlap: atomic orbital overlap matrix (S). 
 
+    ```
     >> matpsi.overlap(); 
+    ```
 
 2. kinetic: kinetic energy matrix (KE). 
 
+    ```
     >> matpsi.kinetic(); 
+    ```
 
 3. potential: 1-electron potential energy matrix (EN). Summed over all atoms. 
 
+    ```
     >> matpsi.potential(); 
+    ```
 
 4. potential_sep: atom-separated 1-electron potential energy matrices (ENI). Returns a 3-D, (nbasis by nbasis by natom) array. 
 
+    ```
     >> matpsi.potential_sep(); 
+    ```
 
 ###Two electron integrals 
 
 1. tei_ijkl: 4-indexed two electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
 
+    ```
     >> matpsi.tei_ijkl({i, j, k, l}); 
+    ```
 
 #TODO 
 
