@@ -3,9 +3,9 @@ MatPsi
 
 MatPsi: An interface between Matlab and Psi4 
 
-#Usage: 
+#Usage 
 
-###Constructor: 
+###Constructor 
 
 Usually, we construct a MatPsi object using 2 strings, one describing the molecule's geometry, and one set the name of the basis set we are going to use. 
 
@@ -28,7 +28,7 @@ A = 104.5
 >>matpsi = MatPsi({mol_string, basis_name});
 ```
 
-###Copy Constructor:
+###Copy Constructor
 
 Construct from an existing MatPsi object. 
 
@@ -38,61 +38,71 @@ example:
 >>matpsi2 = matpsi.MatPsiCopy();
 ```
 
-###Molecule and basis set properties: 
+###Molecule and basis set properties 
 
-natom: number of atoms. 
+1. natom: number of atoms. 
 
 ```
 >>matpsi.natom(); 
 ```
 
-nbasis: number of basis functions. 
+2. nbasis: number of basis functions. 
 
 ```
 >>matpsi.nbasis(); 
 ```
 
-nelec: number of electrons. 
+3. nelec: number of electrons. 
 
 ```
 >>matpsi.nelec(); 
 ```
 
-###One electron integrals: 
+###One electron integrals 
 
-overlap: atomic orbital overlap matrix (S). 
+1. overlap: atomic orbital overlap matrix (S). 
 
 ```
 >>matpsi.overlap(); 
 ```
 
-kinetic: kinetic energy matrix (KE). 
+2. kinetic: kinetic energy matrix (KE). 
 
 ```
 >>matpsi.kinetic(); 
 ```
 
-potential: 1-electron potential energy matrix (EN). Summed over all atoms. 
+3. potential: 1-electron potential energy matrix (EN). Summed over all atoms. 
 
 ```
 >>matpsi.potential(); 
 ```
 
-potential_sep: atom-separated 1-electron potential energy matrices (ENI). Returns a 3-D, (nbasis by nbasis by natom) array. 
+4. potential_sep: atom-separated 1-electron potential energy matrices (ENI). Returns a 3-D, (nbasis by nbasis by natom) array. 
 
 ```
 >>matpsi.potential_sep(); 
 ```
 
-###Two electron integrals: 
+###Two electron integrals 
 
-tei_ijkl: 4-indexed two electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
+1. tei_ijkl: 4-indexed two electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
 
 ```
 >>matpsi.tei_ijkl({i, j, k, l}); 
 ```
 
-#Developer's Note: 
+#TODO 
+
+1. Add some more two electron integral methods. 
+
+2. Hartree Fock SCF. 
+
+3. Add a function that takes a density matrix as input and outputs the G = J - 1/2 * K matrix. 
+
+4. Environment. Need to know exactly how we implement. 
+
+#Developer's Note 
 
 To make two electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
@@ -127,14 +137,6 @@ TwoBodyAOInt::TwoBodyAOInt(const IntegralFactory* intsfactory, int deriv) :
 
 the lase line, "target_pybuffer_(&target_, true)", is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set "bool enable_pybuffer_" as "false" for ever. 
 
-#TODO: 
 
-1. Add some more two electron integral methods. 
-
-2. Hartree Fock SCF. 
-
-3. Add a function that takes a density matrix as input and outputs the G = J - 1/2 * K matrix. 
-
-4. Environment. Need to know exactly how we implement. 
 
 
