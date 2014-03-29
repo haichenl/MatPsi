@@ -108,7 +108,7 @@ Construct from an existing MatPsi object.
 
 To make two electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
-From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has the properties below which are probably related with their python interface; 
+From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has some properties probably related with Psi4's python interface: 
 
     class TwoBodyAOInt
     {
@@ -133,7 +133,7 @@ and in "$psi4dir/src/lib/libmins/twobody.cc", `TwoBodyAOInt` class virtual const
         target_(0),
         target_pybuffer_(&target_, true)
 
-the last line, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` for ever. 
+the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` for ever. 
 
 
 
