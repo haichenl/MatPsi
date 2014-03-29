@@ -106,7 +106,7 @@ example:
 
 To make two electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
-From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class "TwoBodyAOInt" has the properties below which are probably related with their python interface; 
+From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has the properties below which are probably related with their python interface; 
 
     ```
     class TwoBodyAOInt
