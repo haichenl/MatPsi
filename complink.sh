@@ -2,7 +2,7 @@
 
 ## IMPORTANT INFORMATION 
 ## 1. All $psi4 mentioned below better be /home/haichen/psi4_for_MatPsi/ 
-##    as the original Psi4 source code has been changed a little bit 
+##    as the original Psi4 source code has been changed a little bit. 
 ## 2. After compiling Psi4, go into $psi4/objdir/include/libint, 
 ##    recompile vrr_build.c by adding a -fPIC flag, then replace 
 ##    the original vrr_build.o in $psi4/objdir/lib/libPSI_int.a 
