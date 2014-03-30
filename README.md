@@ -1,7 +1,11 @@
 MatPsi: An interface between Matlab and Psi4
 ======
 
-#Usage 
+##Compilation
+
+Please refer to complink.sh 
+
+##Usage 
 
 Usage is (nearly) all of Matlab convention, except that all the function __input arguments__ have to be in __one cell array__: 
 
