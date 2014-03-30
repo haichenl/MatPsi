@@ -1,13 +1,13 @@
 #!/bin/sh 
 
-## IMPORTANT INFORMATION 
-## 1. All $psi4 mentioned below better be /home/haichen/psi4_for_MatPsi/ 
-##    as the original Psi4 source code has been changed a little bit. 
-## 2. After compiling Psi4, go into $psi4/objdir/include/libint, 
-##    recompile vrr_build.c by adding a -fPIC flag, then replace 
-##    the original vrr_build.o in $psi4/objdir/lib/libPSI_int.a 
-##    with the one newly compiled. This allows Mex to compile our code
-##    into a dynamic library file, which is needed by Matlab. 
+# ABOUT PSI4 LIBRARIES  
+# 1. All $psi4 mentioned below better be /home/haichen/psi4_for_MatPsi/ 
+#    as the original Psi4 source code has been changed a little bit. 
+# 2. After compiling Psi4, go to $psi4/objdir/include/libint, recompile 
+#    vrr_build.c by adding a -fPIC flag, then replace the original vrr_build.o
+#    in $psi4/objdir/lib/libPSI_int.a with the one newly compiled by ar r. 
+#    Refer to $psi4/objdir/out about how to compile vrr_build.c. This allows
+#    Mex to compile our code into a dynamic library file required by Matlab. 
 
 # COMPILATION NOTICE 
 # Please make sure: 
