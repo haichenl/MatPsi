@@ -137,7 +137,7 @@ and in "$psi4dir/src/lib/libmins/twobody.cc", `TwoBodyAOInt` class virtual const
         target_(0),
         target_pybuffer_(&target_, true)
 
-the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` for ever. 
+the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` forever. 
 
 
 
