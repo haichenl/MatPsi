@@ -62,7 +62,7 @@ Construct from an existing MatPsi object.
     >> matpsi.nelec(); 
     ```
 
-###One electron integrals 
+###One-electron integrals 
 
 1. overlap: atomic orbital overlap matrix (S). 
 
@@ -88,9 +88,9 @@ Construct from an existing MatPsi object.
     >> matpsi.potential_sep(); 
     ```
 
-###Two electron integrals 
+###Two-electron integrals 
 
-1. tei_ijkl: 4-indexed two electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
+1. tei_ijkl: 4-indexed two-electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
 
     ```
     >> matpsi.tei_ijkl( {i, j, k, l} ); 
@@ -100,7 +100,7 @@ Construct from an existing MatPsi object.
 
 #TODO 
 
-1. Add some more two electron integral methods. 
+1. Add some more two-electron integral methods. 
 
 2. Hartree Fock SCF. 
 
@@ -110,7 +110,7 @@ Construct from an existing MatPsi object.
 
 #Developer's Note 
 
-To make two electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
+To make two-electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
 From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has some properties probably related with Psi4's python interface: 
 
