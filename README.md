@@ -13,7 +13,7 @@ Usage is (nearly) all of Matlab convention, except that all the function __input
 
 This is assumed by _Example MATLAB class wrapper for a C++ class_ 's developer Oliver Woodford. See http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
 
-###Constructor 
+####Constructor 
 
 Usually, we construct a MatPsi object using 2 strings, one describing the molecule's geometry, and one set the name of the basis set we are going to use. 
 
@@ -36,13 +36,13 @@ basis_name =
 
 Notice that both strings are in a cell array. 
 
-###Copy Constructor
+####Copy Constructor
 
 Construct from an existing MatPsi object. 
 
     >> matpsi2 = matpsi.MatPsiCopy();
 
-###Molecule and basis set properties 
+####Molecule and basis set properties 
 
 1. natom: number of atoms. 
 
@@ -62,7 +62,7 @@ Construct from an existing MatPsi object.
     >> matpsi.nelec(); 
     ```
 
-###One-electron integrals 
+####One-electron integrals 
 
 1. overlap: atomic orbital overlap matrix (S). 
 
@@ -88,7 +88,7 @@ Construct from an existing MatPsi object.
     >> matpsi.potential_sep(); 
     ```
 
-###Two-electron integrals 
+####Two-electron integrals 
 
 1. tei_ijkl: 4-indexed two-electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
 
@@ -98,7 +98,7 @@ Construct from an existing MatPsi object.
 
     Notice that all indices are in a cell array. 
 
-#TODO 
+##TODO 
 
 1. Add some more two-electron integral methods. 
 
@@ -108,7 +108,7 @@ Construct from an existing MatPsi object.
 
 4. Environment. Need to know exactly how we implement. 
 
-#Developer's Note 
+##Developer's Note 
 
 To make two-electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
