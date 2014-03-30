@@ -44,19 +44,19 @@ Construct from an existing MatPsi object.
 
 ####Molecule and basis set properties 
 
-1. natom: number of atoms. 
+1. natom: Number of atoms. 
 
     ```
     >> matpsi.natom(); 
     ```
 
-2. nbasis: number of basis functions. 
+2. nbasis: Number of basis functions. 
 
     ```
     >> matpsi.nbasis(); 
     ```
 
-3. nelec: number of electrons. 
+3. nelec: Number of electrons. 
 
     ```
     >> matpsi.nelec(); 
@@ -64,25 +64,25 @@ Construct from an existing MatPsi object.
 
 ####One-electron integrals 
 
-1. overlap: atomic orbital overlap matrix (S). 
+1. overlap: Atomic orbital overlap matrix (S). 
 
     ```
     >> matpsi.overlap(); 
     ```
 
-2. kinetic: kinetic energy matrix (KE). 
+2. kinetic: Kinetic energy matrix (KE). 
 
     ```
     >> matpsi.kinetic(); 
     ```
 
-3. potential: 1-electron potential energy matrix (EN). Summed over all atoms. 
+3. potential: One-electron potential energy matrix (EN). Summed over all atoms. 
 
     ```
     >> matpsi.potential(); 
     ```
 
-4. potential_sep: atom-separated 1-electron potential energy matrices (ENI). Returns a 3-D, (nbasis by nbasis by natom) array. 
+4. potential_sep: Atom-separated One-electron potential energy matrices (ENI). Returns a 3-D, (nbasis by nbasis by natom) array. 
 
     ```
     >> matpsi.potential_sep(); 
