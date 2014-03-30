@@ -15,7 +15,7 @@ This is assumed by _Example MATLAB class wrapper for a C++ class_ 's developer O
 
 ####Constructor 
 
-Usually, we construct a MatPsi object using 2 strings, one describing the molecule's geometry, and one set the name of the basis set we are going to use. 
+Usually, we construct a MatPsi object using 2 strings, one describes the molecule's geometry (as well as charge and spin), and one sets the name of the basis set we use. 
 
 ```
 mol_string = 
