@@ -112,7 +112,7 @@ Construct from an existing MatPsi object.
 
 3. Add a function that takes a density matrix as input and outputs the G = J - 1/2 * K matrix. 
 
-  ~~4. Environment. Need to know exactly how we implement.~~ 
+ ~~4. Environment. Need to know exactly how we implement.~~ 
 
 ##Developer's Note 
 
