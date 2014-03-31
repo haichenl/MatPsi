@@ -70,6 +70,9 @@ public:
     // compute the atom-separated potential energy matrix ENI 
     boost::shared_array<SharedMatrix> potential_sep();
     
+    // compute from a given point charge the environment potential energy matrix ENVI
+    SharedMatrix potential_zxyz(const double* Zxyz_array);
+    
     // compute the 4-indexed two electron integral H2(i, j, k, l) 
     double tei_ijkl(int i, int j, int k, int l);
     

@@ -54,9 +54,14 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('potential', this.objectHandle, varargin{:});
         end
         
-        %% separated potential, (nbasis, nbasis, natom) 3-d matrix
+        %% atom-separated potential, (nbasis, nbasis, natom) 3-d matrix
         function varargout = potential_sep(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('potential_sep', this.objectHandle, varargin{:});
+        end
+        
+        %% environment potential for a point charge, (nbasis, nbasis) matrix
+        function varargout = potential_zxyz(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('potential_zxyz', this.objectHandle, varargin{:});
         end
         
         %% tei_ijkl, 1 double

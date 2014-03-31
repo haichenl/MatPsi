@@ -88,6 +88,12 @@ Construct from an existing MatPsi object.
     >> matpsi.potential_sep(); 
     ```
 
+5. potential_zxyz: Environment potential energy matrix (ENVI) for a given point charge in the format of {Z, x, y, z}; Z stands for charge magnitude; x, y, z are Cartesian coordinates of the point charge. 
+
+    ```
+    >> matpsi.potential_zxyz( {Z, x, y, z} ); 
+    ```
+
 ####Two-electron integrals 
 
 1. tei_ijkl: 4-indexed two-electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
@@ -106,7 +112,7 @@ Construct from an existing MatPsi object.
 
 3. Add a function that takes a density matrix as input and outputs the G = J - 1/2 * K matrix. 
 
-4. Environment. Need to know exactly how we implement. 
+~~4. Environment. Need to know exactly how we implement.~~ 
 
 ##Developer's Note 
 

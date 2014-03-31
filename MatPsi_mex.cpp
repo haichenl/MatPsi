@@ -80,6 +80,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
 	
+    // Properties
     // natom
     if (!strcmp("natom", cmd)) {
         // Check parameters
@@ -127,6 +128,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
 	
+    // One-electron integrals 
 	// overlap(nbasis, nbasis)
     if (!strcmp("overlap", cmd)) {
         // Check parameters
@@ -182,6 +184,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // potential_zxyz(nbasis, nbasis)
+    if (!strcmp("potential_zxyz", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("potential_zxyz: Unexpected arguments.");
+        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 4)
+            mexErrMsgTxt("potential_zxyz: Cell array {Z, x, y, z} input expected.");
+        // Call the method
+        mxArray *tmp;
+        double Zxyz_array[4];
+        for(int i = 0; i < 4; i++) {
+            tmp = mxGetCell(prhs[2], i);
+            Zxyz_array[i] = (double)mxGetScalar(tmp);
+        }
+        SharedMatrix vEnviMat = MatPsi_obj->potential_zxyz(Zxyz_array);
+		MatOut(vEnviMat, plhs[0]);
+        return;
+    }
+    
+    // Two-electron integrals 
     // tei_ijkl
     if (!strcmp("tei_ijkl", cmd)) {
         // Check parameters
