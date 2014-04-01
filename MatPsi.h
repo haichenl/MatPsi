@@ -73,7 +73,10 @@ public:
     // compute from a given point charge the environment potential energy matrix ENVI
     SharedMatrix potential_zxyz(const double* Zxyz_array);
     
-    // compute the 4-indexed two electron integral H2(i, j, k, l) 
+    // compute the 4-indexed two-electron integral H2(i, j, k, l) 
     double tei_ijkl(int i, int j, int k, int l);
+    
+    // compute all unique two-electron integrals and put them in a vector; be careful as it costs a huge amount of memory 
+    SharedVector tei_alluniq();
     
 };

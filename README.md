@@ -104,6 +104,12 @@ Construct from an existing MatPsi object.
 
     Notice that all indices are in a cell array. 
 
+2. tei_alluniq: Evaluates and returns all unique two-electron interaction integrals. Does not consider geometrical symmetry. 
+
+    ```
+    >> matpsi.tei_alluniq(); 
+    ```
+
 ##TODO 
 
 1. Add some more two-electron integral methods. 

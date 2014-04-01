@@ -68,6 +68,11 @@ classdef MatPsi < handle
         function varargout = tei_ijkl(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('tei_ijkl', this.objectHandle, varargin{:});
         end
+        
+        %% tei_alluniq, (nuniq, 1) vector 
+        function varargout = tei_alluniq(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('tei_alluniq', this.objectHandle, varargin{:});
+        end
 
     end
 end

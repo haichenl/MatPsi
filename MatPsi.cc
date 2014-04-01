@@ -125,3 +125,30 @@ double MatPsi::tei_ijkl(int i, int j, int k, int l) {
     const double *buffer = eri_->buffer();
     return buffer[ll+nl*(kk+nk*(jj+nj*ii))];
 }
+
+inline int ij2I(int i, int j) {
+    if(i < j) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+    }
+    return i * ( i + 1 ) / 2 + j;
+}
+
+SharedVector MatPsi::tei_alluniq() {
+    AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
+    int nuniq = ( nbasis_ * ( nbasis_ + 1 ) * ( nbasis_ * nbasis_ + nbasis_ + 2 ) ) / 8;
+    SharedVector tei_alluniqvec(new Vector(nuniq));
+    const double *buffer = eri_->buffer();
+    for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
+        // Compute quartet
+        eri_->compute_shell(shellIter);
+        // From the quartet get all the integrals
+        AOIntegralsIterator intIter = shellIter.integrals_iterator();
+        for (intIter.first(); intIter.is_done() == false; intIter.next()) {
+            tei_alluniqvec->set( ij2I( ij2I(intIter.i(), intIter.j()), ij2I(intIter.k(), intIter.l()) ), buffer[intIter.index()] );
+        }
+    }
+    return tei_alluniqvec;
+}
+

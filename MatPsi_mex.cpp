@@ -18,6 +18,16 @@ void MatOut(SharedMatrix Mat_c, mxArray*& Mat_m) {
 	}
 }
 
+void VecOut(SharedVector Vec_c, mxArray*& Mat_m) {
+	int dim = Vec_c->dim();
+	Mat_m = mxCreateDoubleMatrix( dim, 1, mxREAL);
+	double* Mat_m_pt = mxGetPr(Mat_m);
+	double* Vec_c_pt = Vec_c->pointer();
+	for(int i = 0; i < dim; i++) {
+		*Mat_m_pt++ = *Vec_c_pt++;
+	}
+}
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {	
     // Get the command string
     char cmd[64];
@@ -224,6 +234,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         plhs[0] = mxCreateDoubleMatrix( 1, 1, mxREAL);
         double* tei_ijkl_pt = mxGetPr(plhs[0]);
         *tei_ijkl_pt = MatPsi_obj->tei_ijkl(ind[0], ind[1], ind[2], ind[3]);
+        return;
+    }
+    
+    // tei_alluniq 
+    if (!strcmp("tei_alluniq", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("tei_alluniq: Unexpected arguments.");
+        // Call the method
+        SharedVector tei_alluniqVec(MatPsi_obj->tei_alluniq());
+        VecOut(tei_alluniqVec, plhs[0]);
         return;
     }
     
