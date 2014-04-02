@@ -175,7 +175,6 @@ the last line shown, `target_pybuffer_(&target_, true)`, is known causing some s
 
 Apr. 02: A new method, void remove_symmetry(), has been added to JK class. It allows us to get rid of the geometrical symmetry automatically imposed (but not used in real computation for some weird reasons) by JK constructor. 
 
-    ```
     class JK {
         ...
     public:
@@ -185,5 +184,5 @@ Apr. 02: A new method, void remove_symmetry(), has been added to JK class. It al
             AO2USO_->identity();
         }
     };
-    ```
+
 
