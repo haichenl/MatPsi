@@ -1,4 +1,5 @@
 #include <libmints/mints.h>
+#include <libfock/jk.h>
 #include <psi4-dec.h>
 #include <libparallel/parallel.h>
 #include "mex.h"
@@ -26,6 +27,7 @@ protected:
 	boost::shared_ptr<IntegralFactory> intfac_;
     boost::shared_ptr<TwoBodyAOInt> eri_;
 	boost::shared_ptr<MatrixFactory> matfac_;
+    boost::shared_ptr<DirectJK> directjk_;
     
 public:
     // constructor; takes in 2 strings and parse them 
@@ -57,6 +59,11 @@ public:
         SharedMatrix coordMat = (molecule_->geometry()).clone();
         return coordMat;
     }
+    
+    // nuclear repulsion energy 
+    double Enuc() {
+        return molecule_->nuclear_repulsion_energy();
+    }
 	
     // compute the overlap matrix S 
 	SharedMatrix overlap();
@@ -78,5 +85,8 @@ public:
     
     // compute all unique two-electron integrals and put them in a vector; be careful as it costs a huge amount of memory 
     SharedVector tei_alluniq();
+    
+    // for Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
+    SharedMatrix HFnosymmMO2G(SharedMatrix coeff, long int memory = 1000000000L, double cutoff = 1.0E-12);
     
 };

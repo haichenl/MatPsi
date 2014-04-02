@@ -7,6 +7,18 @@ using namespace std;
 using namespace psi;
 using namespace boost;
 
+SharedMatrix MatIn(mxArray*& Mat_m) {
+	int nrow = mxGetM(Mat_m);
+	int ncol = mxGetN(Mat_m);
+    SharedMatrix Mat_c(new Matrix(nrow, ncol));
+	double* Mat_m_pt = mxGetPr(Mat_m);
+	double* Mat_c_pt = Mat_c->get_pointer();
+	for(int i = 0; i < nrow * ncol; i++) {
+		*Mat_c_pt++ = *Mat_m_pt++;
+	}
+    return Mat_c;
+}
+
 void MatOut(SharedMatrix Mat_c, mxArray*& Mat_m) {
 	int nrow = Mat_c->nrow();
 	int ncol = Mat_c->ncol();
@@ -137,6 +149,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		MatOut(zMat, plhs[0]);
         return;
     }
+    
+    // Enuc
+    if (!strcmp("Enuc", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("Enuc: Unexpected arguments.");
+        // Call the method
+        plhs[0] = mxCreateDoubleMatrix( 1, 1, mxREAL);
+        double* nelec_pt = mxGetPr(plhs[0]);
+        *nelec_pt = MatPsi_obj->Enuc();
+        return;
+    }
 	
     // One-electron integrals 
 	// overlap(nbasis, nbasis)
@@ -245,6 +269,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Call the method
         SharedVector tei_alluniqVec(MatPsi_obj->tei_alluniq());
         VecOut(tei_alluniqVec, plhs[0]);
+        return;
+    }
+    
+    // HFnosymmMO2G(nbasis, nbasis) 
+    if (!strcmp("HFnosymmMO2G", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("HFnosymmMO2G: Unexpected arguments.");
+        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
+            mexErrMsgTxt("HFnosymmMO2G: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
+        mxArray *tmp;
+        tmp = mxGetCell(prhs[2], 0);
+        int nbasis = MatPsi_obj->nbasis();
+        if (mxGetM(tmp) != nbasis)
+            mexErrMsgTxt("HFnosymmMO2G: MO matrix dimension does not agree.");
+        // Call the method
+        SharedMatrix MOmat = MatIn(tmp);
+        SharedMatrix gMat = MatPsi_obj->HFnosymmMO2G(MOmat);
+		MatOut(gMat, plhs[0]);
         return;
     }
     

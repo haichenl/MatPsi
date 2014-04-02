@@ -62,6 +62,18 @@ Construct from an existing MatPsi object.
     >> matpsi.nelec(); 
     ```
 
+4. coord: Atom Cartesian coordinates. 
+
+    ```
+    >> matpsi.coord(); 
+    ```
+
+5. Enuc:  Nuclear repulsion energy. 
+
+    ```
+    >> matpsi.Enuc(); 
+    ```
+
 ####One-electron integrals 
 
 1. overlap: Atomic orbital overlap matrix (S). 
@@ -104,11 +116,21 @@ Construct from an existing MatPsi object.
 
     Notice that all indices are in a cell array. 
 
-2. tei_alluniq: Evaluates and returns all unique two-electron interaction integrals. Does not consider geometrical symmetry. 
+2. tei_alluniq: All unique two-electron interaction integrals. Does not consider geometrical symmetry. Be careful as it consumes a huge amount of memory. 
 
     ```
     >> matpsi.tei_alluniq(); 
     ```
+
+####SCF related 
+
+1. HFnosymmMO2G: For Hartree Fock theory, forms the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. Direct algorithm. No geometrical symmetry is considered. Temporarily set memory to 8 GB and integral cutoff to 1.0E-12 before figuring out a better way to specify these constants (probably in constructor?). 
+
+    ```
+    >> matpsi.HFnosymmMO2G( { occMO } ); 
+    ```
+    
+    Notice that occMO is in a cell array and must have nbasis number of rows. 
 
 ##TODO 
 

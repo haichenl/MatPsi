@@ -38,6 +38,11 @@ classdef MatPsi < handle
         function varargout = coord(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('coord', this.objectHandle, varargin{:});
         end
+        
+        %% Enuc, 1 double 
+        function varargout = Enuc(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('Enuc', this.objectHandle, varargin{:});
+        end
 		
 		%% overlap, (nbasis, nbasis) matrix
         function varargout = overlap(this, varargin)
@@ -72,6 +77,11 @@ classdef MatPsi < handle
         %% tei_alluniq, (nuniq, 1) vector 
         function varargout = tei_alluniq(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('tei_alluniq', this.objectHandle, varargin{:});
+        end
+        
+        %% HFnosymmMO2G, (nbasis, nbasis) matrix 
+        function varargout = HFnosymmMO2G(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('HFnosymmMO2G', this.objectHandle, varargin{:});
         end
 
     end

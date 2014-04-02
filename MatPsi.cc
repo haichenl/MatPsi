@@ -19,18 +19,18 @@ MatPsi::MatPsi(std::string mol_string, std::string basis_name) {
     basis_ = BasisSet::construct(parser, molecule_, "BASIS");
     
     // create integral factory object 
-    boost::shared_ptr<IntegralFactory> integral_factory_temp(new IntegralFactory(basis_, basis_, basis_, basis_));
-    intfac_ = integral_factory_temp;
+    intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
     
     // create two electron integral generator
-    boost::shared_ptr<TwoBodyAOInt> eri_temp(intfac_->eri());
-    eri_ = eri_temp;
+    eri_ = boost::shared_ptr<TwoBodyAOInt>(intfac_->eri());
     
     // create matrix factory object 
     int nbf[] = { basis_->nbf() };
-    boost::shared_ptr<MatrixFactory> matrix_factory_temp(new MatrixFactory);
-    matfac_ = matrix_factory_temp;
+    matfac_ = boost::shared_ptr<MatrixFactory>(new MatrixFactory);
     matfac_->init_with(1, nbf, nbf);
+    
+    // create directJK object
+    directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
     
     // number of atoms 
     natom_ = molecule_->natom();
@@ -57,6 +57,7 @@ MatPsi::MatPsi(boost::shared_ptr<MatPsi> inputMatPsi) {
     intfac_ = inputMatPsi->intfac_;
     eri_ = inputMatPsi->eri_;
     matfac_ = inputMatPsi->matfac_;
+    directjk_ = inputMatPsi->directjk_;
 }
 
 SharedMatrix MatPsi::overlap() {
@@ -152,3 +153,22 @@ SharedVector MatPsi::tei_alluniq() {
     return tei_alluniqvec;
 }
 
+SharedMatrix MatPsi::HFnosymmMO2G(SharedMatrix MO, long int memory, double cutoff) {
+    directjk_->set_memory(memory);
+    directjk_->set_cutoff(cutoff);
+    directjk_->set_do_J(true);
+    directjk_->set_do_K(true);
+    directjk_->set_allow_desymmetrization(true);
+    directjk_->initialize();
+    directjk_->remove_symmetry();
+    std::vector<SharedMatrix>& C_left = directjk_->C_left();
+    C_left.clear();
+    C_left.push_back(MO);
+    directjk_->compute();
+    SharedMatrix Gnew = directjk_->J()[0];
+    SharedMatrix Knew = directjk_->K()[0];
+    Knew->scale(0.5);
+    Gnew->add(Knew);
+    directjk_->finalize();
+    return Gnew;
+}
