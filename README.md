@@ -94,7 +94,7 @@ Construct from an existing MatPsi object.
     >> matpsi.potential(); 
     ```
 
-4. potential_sep: Atom-separated One-electron potential energy matrices (ENI). Returns a 3-D, (nbasis by nbasis by natom) array. 
+4. potential_sep: Atom-separated One-electron potential energy matrices (ENI). Return a 3-D, (nbasis by nbasis by natom) array. 
 
     ```
     >> matpsi.potential_sep(); 
@@ -108,7 +108,7 @@ Construct from an existing MatPsi object.
 
 ####Two-electron integrals 
 
-1. tei_ijkl: 4-indexed two-electron interaction integral. Needs four indices as input arguments. Returns only one integral value. 
+1. tei_ijkl: 4-indexed two-electron interaction integral. Need four indices as input arguments. Return only one integral value. 
 
     ```
     >> matpsi.tei_ijkl( {i, j, k, l} ); 
@@ -116,7 +116,7 @@ Construct from an existing MatPsi object.
 
     Notice that all indices are in a cell array. 
 
-2. tei_alluniq: All unique two-electron interaction integrals. Does not consider geometrical symmetry. Be careful as it consumes a huge amount of memory. 
+2. tei_alluniq: All unique two-electron interaction integrals. No geometrical symmetry is considered. Be careful as it consumes a huge amount of memory. 
 
     ```
     >> matpsi.tei_alluniq(); 
@@ -124,7 +124,7 @@ Construct from an existing MatPsi object.
 
 ####SCF related 
 
-1. HFnosymmMO2G: For Hartree Fock theory, forms the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. Direct algorithm. No geometrical symmetry is considered. Temporarily set memory to 8 GB and integral cutoff to 1.0E-12 before figuring out a better way to specify these constants (probably in constructor?). 
+1. HFnosymmMO2G: For Hartree Fock theory, form the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. Direct algorithm. No geometrical symmetry is considered. Temporarily set memory to 8 GB and integral cutoff to 1.0E-12 before figuring out a better way to specify these constants (probably in constructor?). 
 
     ```
     >> matpsi.HFnosymmMO2G( { occMO } ); 
@@ -144,7 +144,7 @@ Construct from an existing MatPsi object.
 
 ##Developer's Note 
 
-To make two-electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
+1. To make two-electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
 From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has some properties probably related with Psi4's python interface: 
 
@@ -173,6 +173,16 @@ and in "$psi4dir/src/lib/libmins/twobody.cc", `TwoBodyAOInt` class virtual const
 
 the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` forever. 
 
+2. A new method, void remove_symmetry(), has been added to JK class. It allows us to get rid of the geometrical symmetry automatically imposed (but not used in real computation for some weird reasons) by JK constructor. 
 
+    class JK {
+        ...
+    public:
+        ...
+        void remove_symmetry() {
+            AO2USO_ = SharedMatrix(new Matrix("AO->SO matrix", primary_->nbf(), primary_->nbf()));
+            AO2USO_->identity();
+        }
+    };
 
 
