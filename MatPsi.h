@@ -19,9 +19,6 @@ namespace psi {
 
 class MatPsi {
 protected:
-    int natom_;
-    int nbasis_;
-    int nelec_;
     boost::shared_ptr<Molecule> molecule_;
     boost::shared_ptr<BasisSet> basis_;
 	boost::shared_ptr<IntegralFactory> intfac_;
@@ -36,35 +33,35 @@ public:
     // copy constructor 
 	MatPsi(boost::shared_ptr<MatPsi> inputMatPsi);
 	
-	~MatPsi() {
-	}
+	~MatPsi() {}
     
+    // Molecule properties 
     // number of atoms 
-    int natom() {
-        return natom_;
-    }
-    
-    // number of basis functions 
-    int nbasis() {
-        return nbasis_;
-    }
-    
-    // number of electrons 
-    int nelec() {
-        return nelec_;
-    }
+    int natom() { return molecule_->natom(); }
     
     // atom coordinates 
-    SharedMatrix coord() {
-        SharedMatrix coordMat = (molecule_->geometry()).clone();
-        return coordMat;
-    }
+    SharedMatrix coord() { return (molecule_->geometry()).clone(); }
     
     // nuclear repulsion energy 
-    double Enuc() {
-        return molecule_->nuclear_repulsion_energy();
-    }
-	
+    double Enuc() { return molecule_->nuclear_repulsion_energy(); }
+    
+    // Z list 
+    SharedVector Zlist();
+    
+    // number of electrons 
+    int nelec();
+    
+    // Basis set properties 
+    // number of basis functions 
+    int nbasis() { return basis_->nbf(); }
+    
+    // map basis number to the number of atom it is centred on 
+    SharedVector func2center();
+    
+    // map basis number to its angular momentum 
+    SharedVector func2am();
+    
+	// One-electron integrals 
     // compute the overlap matrix S 
 	SharedMatrix overlap();
     
@@ -80,12 +77,14 @@ public:
     // compute from a given point charge the environment potential energy matrix ENVI
     SharedMatrix potential_zxyz(const double* Zxyz_array);
     
+    // Two-electron integrals 
     // compute the 4-indexed two-electron integral H2(i, j, k, l) 
     double tei_ijkl(int i, int j, int k, int l);
     
     // compute all unique two-electron integrals and put them in a vector; be careful as it costs a huge amount of memory 
     SharedVector tei_alluniq();
     
+    // SCF related 
     // for Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
     SharedMatrix HFnosymmMO2G(SharedMatrix coeff, long int memory = 1000000000L, double cutoff = 1.0E-12);
     

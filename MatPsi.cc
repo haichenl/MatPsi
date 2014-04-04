@@ -14,8 +14,10 @@ MatPsi::MatPsi(std::string mol_string, std::string basis_name) {
     molecule_ = psi::Molecule::create_molecule_from_string(mol_string);
     molecule_->set_basis_all_atoms(basis_name);
     
-    // create basis object 
+    // create basis object; use pure angular momentum functions (5d or 7f etc.) forever 
     boost::shared_ptr<BasisSetParser> parser(new Gaussian94BasisSetParser());
+    parser->force_puream_or_cartesian_ = true;
+    parser->forced_is_puream_ = true;
     basis_ = BasisSet::construct(parser, molecule_, "BASIS");
     
     // create integral factory object 
@@ -32,32 +34,49 @@ MatPsi::MatPsi(std::string mol_string, std::string basis_name) {
     // create directJK object
     directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
     
-    // number of atoms 
-    natom_ = molecule_->natom();
-    
-    // number of basis functions 
-    nbasis_ = *nbf;
-    
-    // number of electrons 
-    int charge = molecule_->molecular_charge();
-    int nelectron  = 0;
-    for(int i = 0; i < natom_; i++)
-        nelectron += (int)molecule_->Z(i);
-    nelectron -= charge;
-    nelec_ = nelectron;
 }
 
 // copy constructor 
 MatPsi::MatPsi(boost::shared_ptr<MatPsi> inputMatPsi) {
-    natom_ = inputMatPsi->natom_;
-    nbasis_ = inputMatPsi->nbasis_;
-    nelec_ = inputMatPsi->nelec_;
     molecule_ = inputMatPsi->molecule_;
     basis_ = inputMatPsi->basis_;
     intfac_ = inputMatPsi->intfac_;
     eri_ = inputMatPsi->eri_;
     matfac_ = inputMatPsi->matfac_;
     directjk_ = inputMatPsi->directjk_;
+}
+
+SharedVector MatPsi::Zlist() {
+    SharedVector zlistvec(new Vector(molecule_->natom()));
+    for(int i = 0; i < molecule_->natom(); i++) {
+        zlistvec->set(i, (double)molecule_->Z(i));
+    }
+    return zlistvec;
+}
+
+int MatPsi::nelec() {
+    int charge = molecule_->molecular_charge();
+    int nelectron  = 0;
+    for(int i = 0; i < molecule_->natom(); i++)
+        nelectron += (int)molecule_->Z(i);
+    nelectron -= charge;
+    return nelectron;
+}
+
+SharedVector MatPsi::func2center() {
+    SharedVector func2centerVec(new Vector(basis_->nbf()));
+    for(int i = 0; i < basis_->nbf(); i++) {
+        func2centerVec->set(i, (double)basis_->function_to_center(i));
+    }
+    return func2centerVec;
+}
+
+SharedVector MatPsi::func2am() {
+    SharedVector func2amVec(new Vector(basis_->nbf()));
+    for(int i = 0; i < basis_->nbf(); i++) {
+        func2amVec->set(i, (double)basis_->shell(basis_->function_to_shell(i)).am());
+    }
+    return func2amVec;
 }
 
 SharedMatrix MatPsi::overlap() {
@@ -82,6 +101,7 @@ SharedMatrix MatPsi::potential() {
 }
 
 boost::shared_array<SharedMatrix> MatPsi::potential_sep() {
+    int natom_ = molecule_->natom();
     boost::shared_array<SharedMatrix> viMatArray(new SharedMatrix [natom_]);
     boost::shared_ptr<OneBodyAOInt> viOBI(intfac_->ao_potential());
     boost::shared_ptr<PotentialInt> viPtI = boost::static_pointer_cast<PotentialInt>(viOBI);
@@ -138,6 +158,7 @@ inline int ij2I(int i, int j) {
 
 SharedVector MatPsi::tei_alluniq() {
     AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
+    int nbasis_ = basis_->nbf();
     int nuniq = ( nbasis_ * ( nbasis_ + 1 ) * ( nbasis_ * nbasis_ + nbasis_ + 2 ) ) / 8;
     SharedVector tei_alluniqvec(new Vector(nuniq));
     const double *buffer = eri_->buffer();
