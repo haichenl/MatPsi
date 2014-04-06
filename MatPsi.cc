@@ -174,6 +174,29 @@ SharedVector MatPsi::tei_alluniq() {
     return tei_alluniqvec;
 }
 
+SharedVector MatPsi::tei_alluniqForK() {
+    AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
+    int nbasis_ = basis_->nbf();
+    int nuniq = ( nbasis_ * ( nbasis_ + 1 ) * ( nbasis_ * nbasis_ + nbasis_ + 2 ) ) / 8;
+    SharedVector tei_alluniqKvec(new Vector(nuniq));
+    const double *buffer = eri_->buffer();
+    for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
+        // Compute quartet
+        eri_->compute_shell(shellIter);
+        // From the quartet get all the integrals
+        AOIntegralsIterator intIter = shellIter.integrals_iterator();
+        for (intIter.first(); intIter.is_done() == false; intIter.next()) {
+            int i = intIter.i();
+            int j = intIter.j();
+            int k = intIter.k();
+            int l = intIter.l();
+            tei_alluniqKvec->add( ij2I( ij2I(i, l), ij2I(k, j) ), buffer[intIter.index()] );
+            tei_alluniqKvec->add( ij2I( ij2I(j, l), ij2I(i, k) ), buffer[intIter.index()] );
+        }
+    }
+    return tei_alluniqKvec;
+}
+
 SharedMatrix MatPsi::HFnosymmMO2G(SharedMatrix MO, long int memory, double cutoff) {
     directjk_->set_memory(memory);
     directjk_->set_cutoff(cutoff);

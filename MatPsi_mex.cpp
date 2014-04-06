@@ -293,6 +293,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // tei_alluniqForK 
+    if (!strcmp("tei_alluniqForK", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("tei_alluniqForK: Unexpected arguments.");
+        // Call the method
+        OutputVector(plhs[0], MatPsi_obj->tei_alluniqForK());
+        return;
+    }
+    
     // HFnosymmMO2G(nbasis, nbasis) 
     if (!strcmp("HFnosymmMO2G", cmd)) {
         // Check parameters

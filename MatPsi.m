@@ -98,6 +98,11 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('tei_alluniq', this.objectHandle, varargin{:});
         end
         
+        % tei_alluniqForK, (nuniq, 1) vector 
+        function varargout = tei_alluniqForK(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('tei_alluniqForK', this.objectHandle, varargin{:});
+        end
+        
         %% SCF related 
         % HFnosymmMO2G, (nbasis, nbasis) matrix 
         function varargout = HFnosymmMO2G(this, varargin)

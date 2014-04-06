@@ -11,11 +11,13 @@ Usage is (nearly) all of Matlab convention, except that all the function __input
 
     >> [output1, output2, ...] = matpsi.WhatEverFunction( {input1, input2, ...} );
 
-This is assumed by _Example MATLAB class wrapper for a C++ class_ 's developer Oliver Woodford. See http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
+This is assumed by _Example MATLAB class wrapper for a C++ class_ 's developer Oliver Woodford. 
+See http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
 
 ####Constructor 
 
-Usually, we construct a MatPsi object using 2 strings, one describes the molecule's geometry (as well as charge and spin), and one sets the name of the basis set we use. 
+Usually, we construct a MatPsi object using 2 strings, one describes the molecule's geometry (as well as charge and spin), 
+and one sets the name of the basis set we use. 
 
 ```
 mol_string = 
@@ -42,7 +44,7 @@ Construct from an existing MatPsi object.
 
     >> matpsi2 = matpsi.MatPsiCopy();
 
-####Molecule and basis set properties 
+####Molecule properties 
 
 1. natom: Number of atoms. 
 
@@ -50,28 +52,42 @@ Construct from an existing MatPsi object.
     >> matpsi.natom(); 
     ```
 
-2. nbasis: Number of basis functions. 
-
-    ```
-    >> matpsi.nbasis(); 
-    ```
-
-3. nelec: Number of electrons. 
+2. nelec: Number of electrons. 
 
     ```
     >> matpsi.nelec(); 
     ```
 
-4. coord: Atom Cartesian coordinates. 
+3. coord: Atom Cartesian coordinates. 
 
     ```
     >> matpsi.coord(); 
     ```
 
-5. Enuc:  Nuclear repulsion energy. 
+4. Enuc:  Nuclear repulsion energy. 
 
     ```
     >> matpsi.Enuc(); 
+    ```
+
+####Basis set properties 
+
+1. nbasis: Number of basis functions. 
+
+    ```
+    >> matpsi.nbasis(); 
+    ```
+
+2. func2center: A vector mapping basis function number to the number of atom it is centred on, a.k.a "basisAtom" in MSQC. 
+
+    ```
+    >> matpsi.func2center(); 
+    ```
+
+3. func2am(): A vector mapping basis function number to the corresponding angular momentum number, a.k.a "basisType" in MSQC. 
+
+    ```
+    >> matpsi.func2am(); 
     ```
 
 ####One-electron integrals 
@@ -100,7 +116,8 @@ Construct from an existing MatPsi object.
     >> matpsi.potential_sep(); 
     ```
 
-5. potential_zxyz: Environment potential energy matrix (ENVI) for a given point charge in the format of {Z, x, y, z}; Z stands for charge magnitude; x, y, z are Cartesian coordinates of the point charge. 
+5. potential_zxyz: Environment potential energy matrix (ENVI) for a given point charge in the format of {Z, x, y, z}; Z stands for 
+charge magnitude; x, y, z are Cartesian coordinates of the point charge. 
 
     ```
     >> matpsi.potential_zxyz( {Z, x, y, z} ); 
@@ -116,15 +133,25 @@ Construct from an existing MatPsi object.
 
     Notice that all indices are in a cell array. 
 
-2. tei_alluniq: All unique two-electron interaction integrals. No geometrical symmetry is considered. Be careful as it consumes a huge amount of memory. 
+2. tei_alluniq: All unique two-electron interaction integrals. No geometrical symmetry is considered. Be careful as it consumes 
+a huge amount of memory. 
 
     ```
     >> matpsi.tei_alluniq(); 
     ```
 
+2. tei_alluniqForK: Still all unique two-electron interaction integrals but ordered and summed in quick forming of 
+the exchange energy matrix K. See Developer's Note for detailed discussions. 
+
+    ```
+    >> matpsi.tei_alluniqForK(); 
+    ```
+
 ####SCF related 
 
-1. HFnosymmMO2G: For Hartree Fock theory, form the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. Direct algorithm. No geometrical symmetry is considered. Temporarily set memory to 8 GB and integral cutoff to 1.0E-12 before figuring out a better way to specify these constants (probably in constructor?). 
+1. HFnosymmMO2G: For Hartree Fock theory, form the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. 
+Direct algorithm. No geometrical symmetry is considered. Temporarily set memory to 8 GB and integral cutoff to 1.0E-12 before figuring out 
+a better way to specify these constants (probably in constructor?). 
 
     ```
     >> matpsi.HFnosymmMO2G( { occMO } ); 
@@ -146,7 +173,8 @@ Construct from an existing MatPsi object.
 
 Mar. 29: To make two-electron integrals work, the original Psi4 source code has been slightly changed. Below is where and why. 
 
-From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has some properties probably related with Psi4's python interface: 
+From "$psi4dir/src/lib/libmins/twobody.h", we know that the virtual class `TwoBodyAOInt` has some properties probably related with 
+Psi4's python interface: 
 
     class TwoBodyAOInt
     {
@@ -171,9 +199,11 @@ and in "$psi4dir/src/lib/libmins/twobody.cc", `TwoBodyAOInt` class virtual const
         target_(0),
         target_pybuffer_(&target_, true)
 
-the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` forever. 
+the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. 
+Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` forever. 
 
-Apr. 02: A new method, void remove_symmetry(), has been added to JK class. It allows us to get rid of the geometrical symmetry automatically imposed (but not used in real computation for some weird reasons) by JK constructor. 
+Apr. 02: A new method, void remove_symmetry(), has been added to JK class. It allows us to get rid of the geometrical symmetry automatically 
+imposed (but not used in real computation for some weird reasons) by JK constructor. 
 
     class JK {
         ...
@@ -184,5 +214,21 @@ Apr. 02: A new method, void remove_symmetry(), has been added to JK class. It al
             AO2USO_->identity();
         }
     };
+
+Apr. 05: About forming the exchange energy matrix K 
+
+In order to (efficiently) form K, we loop over all unique two-electron integrals and store them as: 
+
+```
+I = i*(i-1)/2 + j;
+J = k*(k-1)/2 + l;
+tbiVecForK( I*(I-1)/2 + J ) = tbi(i, l, k, j) + tbi(j, l, i, k);
+```
+
+where i >= j, k >= l, and I >= J. Then we can form K from tbiVecForK and the density matrix in the same manner as forming J, that is, 
+restore this vector into an (upper case) N by N (N = n*(n+1)/2, n is the number of basis functions) Hermitian matrix, contract 
+the density matrix into an N-length column vector and scale it by C(J) = 2 or C(K) = -1/2 and scale again all of the diagonal elements by 1/2, 
+then time the N by N matrix by this density vector. In the real algorithm we can avoid the "restore", or Hermitianize, step and 
+save some memory as well as sacrifice some speed, though. 
 
 
