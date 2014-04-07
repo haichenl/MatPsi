@@ -84,8 +84,8 @@ public:
     // compute all unique two-electron integrals and put them in a vector; be careful as it costs a huge amount of memory 
     SharedVector tei_alluniq();
     
-    // compute the unique tei vector for forming K 
-    SharedVector tei_alluniqForK();
+    // compute all unique two-electron integrals and pre-arrange them for the forming of J and K 
+    boost::shared_array<SharedVector> tei_alluniqJK();
     
     // SCF related 
     // for Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 

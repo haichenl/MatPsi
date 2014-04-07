@@ -174,11 +174,14 @@ SharedVector MatPsi::tei_alluniq() {
     return tei_alluniqvec;
 }
 
-SharedVector MatPsi::tei_alluniqForK() {
+boost::shared_array<SharedVector> MatPsi::tei_alluniqJK() {
     AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
     int nbasis_ = basis_->nbf();
     int nuniq = ( nbasis_ * ( nbasis_ + 1 ) * ( nbasis_ * nbasis_ + nbasis_ + 2 ) ) / 8;
-    SharedVector tei_alluniqKvec(new Vector(nuniq));
+    boost::shared_array<SharedVector> JKvecs( new SharedVector [2] );
+    JKvecs[0] = SharedVector(new Vector(nuniq));
+    JKvecs[1] = SharedVector(new Vector(nuniq));
+    SharedVector auxvec(new Vector(nuniq));
     const double *buffer = eri_->buffer();
     for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
         // Compute quartet
@@ -190,11 +193,24 @@ SharedVector MatPsi::tei_alluniqForK() {
             int j = intIter.j();
             int k = intIter.k();
             int l = intIter.l();
-            tei_alluniqKvec->add( ij2I( ij2I(i, l), ij2I(k, j) ), buffer[intIter.index()] );
-            tei_alluniqKvec->add( ij2I( ij2I(j, l), ij2I(i, k) ), buffer[intIter.index()] );
+            JKvecs[0]->set(ij2I( ij2I(i, j), ij2I(k, l) ), buffer[intIter.index()] );
         }
     }
-    return tei_alluniqKvec;
+    for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
+        // Compute quartet
+        // From the quartet get all the integrals
+        AOIntegralsIterator intIter = shellIter.integrals_iterator();
+        for (intIter.first(); intIter.is_done() == false; intIter.next()) {
+            int i = intIter.i();
+            int j = intIter.j();
+            int k = intIter.k();
+            int l = intIter.l();
+            JKvecs[1]->set( ij2I( ij2I(i, j), ij2I(k, l) ), JKvecs[0]->get( ij2I( ij2I(i, l), ij2I(k, j) ) ) );
+            auxvec->set( ij2I( ij2I(i, j), ij2I(k, l) ), JKvecs[0]->get( ij2I( ij2I(i, k), ij2I(j, l) ) ) );
+        }
+    }
+    JKvecs[1]->add(auxvec);
+    return JKvecs;
 }
 
 SharedMatrix MatPsi::HFnosymmMO2G(SharedMatrix MO, long int memory, double cutoff) {

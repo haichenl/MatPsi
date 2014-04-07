@@ -140,11 +140,11 @@ a huge amount of memory.
     >> matpsi.tei_alluniq(); 
     ```
 
-2. tei_alluniqForK: Still all unique two-electron interaction integrals but ordered and summed in quick forming of 
+3. tei_alluniqJK: Still all unique two-electron interaction integrals but ordered and summed in quick forming of 
 the exchange energy matrix K. See Developer's Note for detailed discussions. 
 
     ```
-    >> matpsi.tei_alluniqForK(); 
+    >> [Jvec, Kvec] = matpsi.tei_alluniqJK(); 
     ```
 
 ####SCF related 
@@ -222,10 +222,11 @@ In order to (efficiently) form K, we loop over all unique two-electron integrals
 ```
 I = i*(i-1)/2 + j;
 J = k*(k-1)/2 + l;
-tbiVecForK( I*(I-1)/2 + J ) = tbi(i, l, k, j) + tbi(j, l, i, k);
+Jvec( I*(I-1)/2 + J ) = H2(i, j, k, l);
+Kvec( I*(I-1)/2 + J ) = H2(i, l, k, j) + H2(i, k, j, l);
 ```
 
-where i >= j, k >= l, and I >= J. Then we can form K from tbiVecForK and the density matrix in the same manner as forming J, that is, 
+where i >= j, k >= l, and I >= J. Then we can form K from teiVecForK and the density matrix in the same manner as forming J, that is, 
 restore this vector into an (upper case) N by N (N = n*(n+1)/2, n is the number of basis functions) Hermitian matrix, contract 
 the density matrix into an N-length column vector and scale it by C(J) = 2 or C(K) = -1/2 and scale again all of the diagonal elements by 1/2, 
 then time the N by N matrix by this density vector. In the real algorithm we can avoid the "restore", or Hermitianize, step and 

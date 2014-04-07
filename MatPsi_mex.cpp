@@ -293,13 +293,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
-    // tei_alluniqForK 
-    if (!strcmp("tei_alluniqForK", cmd)) {
+    // tei_alluniqJK 
+    if (!strcmp("tei_alluniqJK", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("tei_alluniqForK: Unexpected arguments.");
+            mexErrMsgTxt("tei_alluniqJK: Unexpected arguments.");
         // Call the method
-        OutputVector(plhs[0], MatPsi_obj->tei_alluniqForK());
+        boost::shared_array<SharedVector> JKvecs = MatPsi_obj->tei_alluniqJK();
+        OutputVector(plhs[0], JKvecs[0]);
+        OutputVector(plhs[1], JKvecs[1]);
         return;
     }
     
