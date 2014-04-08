@@ -26,9 +26,48 @@ protected:
 	boost::shared_ptr<MatrixFactory> matfac_;
     boost::shared_ptr<DirectJK> directjk_;
     
+    /// The number of doubly occupied orbitals
+    int ndocc_;
+    /// The number of basis functions
+    int nbf_;
+    /// The maximum number of iterations
+    int maxiter_;
+    /// The nuclear repulsion energy
+    double e_nuc_;
+    /// The convergence criterion for the density
+    double d_convergence_;
+    /// The convergence criterion for the energy
+    double e_convergence_;
+    /// The one electron integrals
+    SharedMatrix H_;
+    /// The overlap matrix
+    SharedMatrix S_;
+    /// The inverse square root of the overlap matrix
+    SharedMatrix X_;
+    /// The Fock Matrix
+    SharedMatrix F_;
+    /// The transformed Fock matrix
+    SharedMatrix Ft_;
+    /// The MO coefficients
+    SharedMatrix C_;
+    /// The MO energies 
+    SharedVector Eorb_;
+    /// The occupied MO coefficients
+    SharedMatrix C_occ_;
+    /// The density matrix
+    SharedMatrix D_;
+    /// The restricted Hartree-Fock energy 
+    double ERHF_;
+    /// Forms the density matrix from the MO coefficients
+    void form_density();
+    /// Computes the electronic part of the SCF energy, and returns it
+    double compute_electronic_energy();
+    /// initialize the directjk object 
+    void init_directjk(double cutoff = 1.0E-12);
+    
 public:
     // constructor; takes in 2 strings and parse them 
-    MatPsi(std::string mol_string, std::string basis_name);
+    MatPsi(std::string mol_string, std::string basis_name, int ncores = 6, unsigned long int memory = 500000000L);
 	
     // copy constructor 
 	MatPsi(boost::shared_ptr<MatPsi> inputMatPsi);
@@ -88,7 +127,28 @@ public:
     boost::shared_array<SharedVector> tei_alluniqJK();
     
     // SCF related 
-    // for Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
-    SharedMatrix HFnosymmMO2G(SharedMatrix coeff, long int memory = 1000000000L, double cutoff = 1.0E-12);
+    // for restricted Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
+    SharedMatrix HFnosymmMO2G(SharedMatrix coeff);
+    
+    // direct restricted Hartree-Fock; super slow 
+    double DirectRHF();
+    
+    // restricted Hartree-Fock energy 
+    double ERHF();
+    
+    // restricted Hartree-Fock molecular orbitals 
+    SharedMatrix orbital();
+    
+    // restricted Hartree-Fock molecular orbital energies 
+    SharedVector Eorb();
+    
+    // restricted Hartree-Fock density matrix 
+    SharedMatrix density();
+    
+    // restricted Hartree-Fock one-electron (core) Hamiltonian matrix 
+    SharedMatrix H1Matrix();
+    
+    // restricted Hartree-Fock Fock matrix 
+    SharedMatrix FockMatrix();
     
 };

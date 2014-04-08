@@ -1,13 +1,18 @@
 // Please directly include this file in MatPsi_mex.cpp to make compilation easier... 
 
 // Constructor
-MatPsi::MatPsi(std::string mol_string, std::string basis_name) {
+MatPsi::MatPsi(std::string mol_string, std::string basis_name, int ncores, unsigned long int memory) {
     // necessary initializations
     Process::environment.initialize();
     WorldComm = initialize_communicator(0, NULL);
     Process::environment.options.set_read_globals(true);
     read_options("", Process::environment.options, true);
     Process::environment.options.set_read_globals(false);
+    
+    // set cores and memory 
+    Process::environment.set_n_threads(ncores);
+    Process::environment.set_memory(memory);
+    
     Wavefunction::initialize_singletons();
     
     // create molecule object and set its basis set name 
@@ -33,6 +38,9 @@ MatPsi::MatPsi(std::string mol_string, std::string basis_name) {
     
     // create directJK object
     directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
+    
+    // initialize Hartree-Fock energy 
+    ERHF_ = 0.0;
     
 }
 
@@ -181,7 +189,6 @@ boost::shared_array<SharedVector> MatPsi::tei_alluniqJK() {
     boost::shared_array<SharedVector> JKvecs( new SharedVector [2] );
     JKvecs[0] = SharedVector(new Vector(nuniq));
     JKvecs[1] = SharedVector(new Vector(nuniq));
-    SharedVector auxvec(new Vector(nuniq));
     const double *buffer = eri_->buffer();
     for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
         // Compute quartet
@@ -205,30 +212,210 @@ boost::shared_array<SharedVector> MatPsi::tei_alluniqJK() {
             int j = intIter.j();
             int k = intIter.k();
             int l = intIter.l();
-            JKvecs[1]->set( ij2I( ij2I(i, j), ij2I(k, l) ), JKvecs[0]->get( ij2I( ij2I(i, l), ij2I(k, j) ) ) );
-            auxvec->set( ij2I( ij2I(i, j), ij2I(k, l) ), JKvecs[0]->get( ij2I( ij2I(i, k), ij2I(j, l) ) ) );
+            JKvecs[1]->set( ij2I( ij2I(i, j), ij2I(k, l) ), JKvecs[0]->get( ij2I( ij2I(i, l), ij2I(k, j) ) ) + JKvecs[0]->get( ij2I( ij2I(i, k), ij2I(j, l) ) ) );
         }
     }
-    JKvecs[1]->add(auxvec);
     return JKvecs;
 }
 
-SharedMatrix MatPsi::HFnosymmMO2G(SharedMatrix MO, long int memory, double cutoff) {
-    directjk_->set_memory(memory);
+void MatPsi::init_directjk(double cutoff) {
     directjk_->set_cutoff(cutoff);
-    directjk_->set_do_J(true);
-    directjk_->set_do_K(true);
-    directjk_->set_allow_desymmetrization(true);
     directjk_->initialize();
     directjk_->remove_symmetry();
+}
+
+SharedMatrix MatPsi::HFnosymmMO2G(SharedMatrix MO) {
+    init_directjk();
     std::vector<SharedMatrix>& C_left = directjk_->C_left();
     C_left.clear();
     C_left.push_back(MO);
     directjk_->compute();
     SharedMatrix Gnew = directjk_->J()[0];
     SharedMatrix Knew = directjk_->K()[0];
-    Knew->scale(0.5);
+    Knew->scale(-0.5);
     Gnew->add(Knew);
     directjk_->finalize();
     return Gnew;
 }
+
+void MatPsi::form_density()
+{
+    for(int p = 0; p < nbf_; ++p){
+        for(int q = 0; q < nbf_; ++q){
+            double val = 0.0;
+            for(int i = 0; i < ndocc_; ++i){
+                val += C_occ_->get(p, i) * C_occ_->get(q, i);
+            }
+            D_->set(p, q, val);
+        }
+    }   
+}
+
+double MatPsi::compute_electronic_energy()
+{
+    Matrix HplusF;
+    HplusF.copy(H_);
+    HplusF.add(F_);
+    return D_->vector_dot(HplusF);    
+}
+
+double MatPsi::DirectRHF() {
+
+    // Initializations 
+    maxiter_ = 100;
+    e_convergence_ = 1e-8;
+    d_convergence_ = 1e-8;
+    
+    nbf_ = basis_->nbf();
+    int nelec_ = nelec();
+    if(nelec_ % 2)
+        throw PSIEXCEPTION("This is only an RHF code, but you gave it an odd number of electrons.  Try again!");
+    ndocc_ = nelec_ / 2;
+    e_nuc_ = molecule_->nuclear_repulsion_energy();
+    
+    S_ = SharedMatrix(new Matrix("Overlap matrix", nbf_, nbf_));
+    H_ = SharedMatrix(new Matrix("Core Hamiltonian matrix", nbf_, nbf_));
+    boost::shared_ptr<OneBodyAOInt> sOBI(intfac_->ao_overlap());
+    boost::shared_ptr<OneBodyAOInt> tOBI(intfac_->ao_kinetic());
+    boost::shared_ptr<OneBodyAOInt> vOBI(intfac_->ao_potential());
+    SharedMatrix V = SharedMatrix(new Matrix("Potential integrals matrix", nbf_, nbf_));
+    sOBI->compute(S_);
+    tOBI->compute(H_);
+    vOBI->compute(V);
+    H_->add(V);
+    
+    // Allocate some matrices
+    X_  = SharedMatrix(new Matrix("S^-1/2", nbf_, nbf_));
+    F_  = SharedMatrix(new Matrix("Fock matrix", nbf_, nbf_));
+    Ft_ = SharedMatrix(new Matrix("Transformed Fock matrix", nbf_, nbf_));
+    C_  = SharedMatrix(new Matrix("MO Coefficients_", nbf_, nbf_));
+    Eorb_  = SharedVector(new Vector("MO Energies_", nbf_));
+    C_occ_  = SharedMatrix(new Matrix("Occupied MO Coefficients_", nbf_, ndocc_));
+    D_  = SharedMatrix(new Matrix("The Density Matrix", nbf_, nbf_));
+    SharedMatrix Temp1(new Matrix("Temporary Array 1", nbf_, nbf_));
+    SharedMatrix Temp2(new Matrix("Temporary Array 2", nbf_, nbf_));
+    SharedMatrix FDS(new Matrix("FDS", nbf_, nbf_));
+    SharedMatrix SDF(new Matrix("SDF", nbf_, nbf_));
+    SharedMatrix Evecs(new Matrix("Eigenvectors", nbf_, nbf_));
+    SharedVector Evals(new Vector("Eigenvalues", nbf_));
+
+    // Form the X_ matrix (S^-1/2)
+    S_->diagonalize(Evecs, Evals, ascending);
+    for(int p = 0; p < nbf_; ++p){
+        double val = 1.0 / sqrt(Evals->get(p));
+        Evals->set(p, val);
+    }
+    Temp1->set_diagonal(Evals);
+    Temp2->gemm(false, true, 1.0, Temp1, Evecs, 0.0);
+    X_->gemm(false, false, 1.0, Evecs, Temp2, 0.0);
+    
+    F_->copy(H_);
+    Ft_->transform(F_, X_);
+    Ft_->diagonalize(Evecs, Evals, ascending);
+
+    C_occ_->gemm(false, false, 1.0, X_, Evecs, 0.0);
+    form_density();
+
+    int iter = 1;
+    bool converged = false;
+    double e_old;
+    double e_new = compute_electronic_energy();
+    
+    init_directjk();
+    std::vector<SharedMatrix>& C_left = directjk_->C_left();
+    
+    while(!converged && iter < maxiter_){
+        e_old = e_new;
+
+        // Add the core Hamiltonian term to the Fock operator
+        F_->copy(H_);
+        
+        // Add the two electron terms to the Fock operator
+        C_left.clear();
+        C_left.push_back(C_occ_);
+        directjk_->compute();
+        Temp1 = directjk_->J()[0];
+        Temp1->scale(2);
+        F_->add(Temp1);
+        F_->subtract(directjk_->K()[0]);
+
+        // Transform the Fock operator and diagonalize it
+        Ft_->transform(F_, X_);
+        Ft_->diagonalize(Evecs, Evals, ascending);
+
+        // Form the orbitals from the eigenvectors of the transformed Fock matrix 
+        C_occ_->gemm(false, false, 1.0, X_, Evecs, 0.0);
+
+        // Rebuild the density using the new orbitals
+        form_density();
+
+        // Compute the energy
+        e_new = compute_electronic_energy();
+        double dE = e_new - e_old;
+ 
+        // Compute the orbital gradient, FDS-SDF
+        Temp1->gemm(false, false, 1.0, D_, S_, 0.0);
+        FDS->gemm(false, false, 1.0, F_, Temp1, 0.0);
+        Temp1->gemm(false, false, 1.0, D_, F_, 0.0);
+        SDF->gemm(false, false, 1.0, S_, Temp1, 0.0);
+        Temp1->copy(FDS);
+        Temp1->subtract(SDF);
+        double dRMS = Temp1->rms();
+     
+        converged = (fabs(dE) < e_convergence_) && (dRMS < d_convergence_);
+
+        iter++;
+    }
+    directjk_->finalize();
+    C_->gemm(false, false, 1.0, X_, Evecs, 0.0);
+    Eorb_->copy(Evals.get());
+    
+    if(!converged)
+        throw PSIEXCEPTION("The SCF iterations did not converge.");
+    
+    ERHF_ = e_nuc_ + e_new;
+    return ERHF_;
+}
+
+double MatPsi::ERHF() { 
+    if(F_ == NULL) { // a trick to determine whether Hartree-Fock has been performed 
+        throw PSIEXCEPTION("ERHF: Hartree-Fock calculation has not been done.");
+    }
+    return ERHF_; 
+}
+
+SharedMatrix MatPsi::orbital() { 
+    if(C_ == NULL) {
+        throw PSIEXCEPTION("orbital: Hartree-Fock calculation has not been done.");
+    }
+    return C_; 
+}
+
+SharedVector MatPsi::Eorb() { 
+    if(Eorb_ == NULL) {
+        throw PSIEXCEPTION("Eorb: Hartree-Fock calculation has not been done.");
+    }
+    return Eorb_; 
+}
+
+SharedMatrix MatPsi::density() { 
+    if(D_ == NULL) {
+        throw PSIEXCEPTION("density: Hartree-Fock calculation has not been done.");
+    }
+    return D_; 
+}
+
+SharedMatrix MatPsi::H1Matrix() { 
+    if(H_ == NULL) {
+        throw PSIEXCEPTION("H1Matrix: Hartree-Fock calculation has not been done.");
+    }
+    return H_; 
+}
+
+SharedMatrix MatPsi::FockMatrix() { 
+    if(F_ == NULL) {
+        throw PSIEXCEPTION("FockMatrix: Hartree-Fock calculation has not been done.");
+    }
+    return F_; 
+}
+

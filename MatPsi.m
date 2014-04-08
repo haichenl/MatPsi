@@ -108,6 +108,41 @@ classdef MatPsi < handle
         function varargout = HFnosymmMO2G(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('HFnosymmMO2G', this.objectHandle, varargin{:});
         end
+        
+        % DirectRHF, 1 double 
+        function varargout = DirectRHF(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('DirectRHF', this.objectHandle, varargin{:});
+        end
+        
+        % ERHF, 1 double 
+        function varargout = ERHF(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('ERHF', this.objectHandle, varargin{:});
+        end
+        
+        % orbital, (nbasis, nbasis) matrix  
+        function varargout = orbital(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('orbital', this.objectHandle, varargin{:});
+        end
+        
+        % Eorb, (nbasis, 1) vector  
+        function varargout = Eorb(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('Eorb', this.objectHandle, varargin{:});
+        end
+        
+        % density, (nbasis, nbasis) matrix  
+        function varargout = density(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('density', this.objectHandle, varargin{:});
+        end
+        
+        % H1Matrix, (nbasis, nbasis) matrix  
+        function varargout = H1Matrix(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('H1Matrix', this.objectHandle, varargin{:});
+        end
+        
+        % FockMatrix, (nbasis, nbasis) matrix  
+        function varargout = FockMatrix(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('FockMatrix', this.objectHandle, varargin{:});
+        end
 
     end
 end

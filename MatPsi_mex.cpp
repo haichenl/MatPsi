@@ -305,6 +305,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // SCF related 
     // HFnosymmMO2G(nbasis, nbasis) 
     if (!strcmp("HFnosymmMO2G", cmd)) {
         // Check parameters
@@ -317,6 +318,76 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Call the method
         mxArray* tmp = mxGetCell(prhs[2], 0);
 		OutputMatrix(plhs[0], MatPsi_obj->HFnosymmMO2G(InputMatrix(tmp)));
+        return;
+    }
+    
+    // DirectRHF
+    if (!strcmp("DirectRHF", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("DirectRHF: Unexpected arguments.");
+        // Call the method
+        OutputScalar(plhs[0], MatPsi_obj->DirectRHF());
+        return;
+    }
+    
+    // ERHF
+    if (!strcmp("ERHF", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("ERHF: Unexpected arguments.");
+        // Call the method
+        OutputScalar(plhs[0], MatPsi_obj->ERHF());
+        return;
+    }
+    
+    // orbital 
+    if (!strcmp("orbital", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("orbital: Unexpected arguments.");
+        // Call the method
+        OutputMatrix(plhs[0], MatPsi_obj->orbital());
+        return;
+    }
+    
+    // Eorb 
+    if (!strcmp("Eorb", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("Eorb: Unexpected arguments.");
+        // Call the method
+        OutputVector(plhs[0], MatPsi_obj->Eorb());
+        return;
+    }
+    
+    // density 
+    if (!strcmp("density", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("density: Unexpected arguments.");
+        // Call the method
+        OutputMatrix(plhs[0], MatPsi_obj->density());
+        return;
+    }
+    
+    // H1Matrix 
+    if (!strcmp("H1Matrix", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("H1Matrix: Unexpected arguments.");
+        // Call the method
+        OutputMatrix(plhs[0], MatPsi_obj->H1Matrix());
+        return;
+    }
+    
+    // FockMatrix 
+    if (!strcmp("FockMatrix", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("FockMatrix: Unexpected arguments.");
+        // Call the method
+        OutputMatrix(plhs[0], MatPsi_obj->FockMatrix());
         return;
     }
     

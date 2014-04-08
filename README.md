@@ -150,8 +150,7 @@ the exchange energy matrix K. See Developer's Note for detailed discussions.
 ####SCF related 
 
 1. HFnosymmMO2G: For Hartree Fock theory, form the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. 
-Direct algorithm. No geometrical symmetry is considered. Temporarily set memory to 8 GB and integral cutoff to 1.0E-12 before figuring out 
-a better way to specify these constants (probably in constructor?). 
+Direct algorithm. No geometrical symmetry is considered. 
 
     ```
     >> matpsi.HFnosymmMO2G( { occMO } ); 
@@ -159,15 +158,51 @@ a better way to specify these constants (probably in constructor?).
     
     Notice that occMO is in a cell array and must have nbasis number of rows. 
 
+2. DirectRHF: Solve restricted Hartree-Fock functions and returns the final Hartree-Fock energy 
+
+    ```
+    >> matpsi.DirectRHF(); 
+    ```
+
+3. ERHF: Get the final restricted Hartree-Fock energy. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.ERHF(); 
+    ```
+
+4. orbital: Restricted Hartree-Fock molecular orbital coefficients. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.orbital(); 
+    ```
+
+5. Eorb: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after DirectRHF. 
+
+    ```
+    >> matpsi.Eorb(); 
+    ```
+
+6. density: Restricted Hartree-Fock density matrix. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.density(); 
+    ```
+
+7. H1Matrix: One-electron (core) Hamiltonian matrix. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.H1Matrix(); 
+    ```
+
+8. FockMatrix: Fock matrix. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.FockMatrix(); 
+    ```
+
 ##TODO 
 
-1. Add some more two-electron integral methods. 
 
-2. Hartree Fock SCF. 
-
-3. Add a function that takes a density matrix as input and outputs the G = J - 1/2 * K matrix. 
-
-~~4. Environment. Need to know exactly how we implement.~~ 
 
 ##Developer's Note 
 
