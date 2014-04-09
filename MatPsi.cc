@@ -164,31 +164,28 @@ inline int ij2I(int i, int j) {
     return i * ( i + 1 ) / 2 + j;
 }
 
-SharedVector MatPsi::tei_alluniq() {
-    AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
-    int nbasis_ = basis_->nbf();
-    int nuniq = ( nbasis_ * ( nbasis_ + 1 ) * ( nbasis_ * nbasis_ + nbasis_ + 2 ) ) / 8;
-    SharedVector tei_alluniqvec(new Vector(nuniq));
-    const double *buffer = eri_->buffer();
-    for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
-        // Compute quartet
-        eri_->compute_shell(shellIter);
-        // From the quartet get all the integrals
-        AOIntegralsIterator intIter = shellIter.integrals_iterator();
-        for (intIter.first(); intIter.is_done() == false; intIter.next()) {
-            tei_alluniqvec->set( ij2I( ij2I(intIter.i(), intIter.j()), ij2I(intIter.k(), intIter.l()) ), buffer[intIter.index()] );
-        }
-    }
-    return tei_alluniqvec;
+int MatPsi::tei_uniqN() {
+    return ( basis_->nbf() * ( basis_->nbf() + 1 ) * ( basis_->nbf() * basis_->nbf() + basis_->nbf() + 2 ) ) / 8;
 }
 
-boost::shared_array<SharedVector> MatPsi::tei_alluniqJK() {
+void MatPsi::tei_alluniq(double* matpt) {
     AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
-    int nbasis_ = basis_->nbf();
-    int nuniq = ( nbasis_ * ( nbasis_ + 1 ) * ( nbasis_ * nbasis_ + nbasis_ + 2 ) ) / 8;
-    boost::shared_array<SharedVector> JKvecs( new SharedVector [2] );
-    JKvecs[0] = SharedVector(new Vector(nuniq));
-    JKvecs[1] = SharedVector(new Vector(nuniq));
+    int nuniq = tei_uniqN();
+    const double *buffer = eri_->buffer();
+    for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
+        // Compute quartet
+        eri_->compute_shell(shellIter);
+        // From the quartet get all the integrals
+        AOIntegralsIterator intIter = shellIter.integrals_iterator();
+        for (intIter.first(); intIter.is_done() == false; intIter.next()) {
+            matpt[ ij2I( ij2I(intIter.i(), intIter.j()), ij2I(intIter.k(), intIter.l()) ) ] = buffer[intIter.index()];
+        }
+    }
+}
+
+void MatPsi::tei_allfull(double* matpt) {
+    AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
+    int nbf_ = basis_->nbf();
     const double *buffer = eri_->buffer();
     for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
         // Compute quartet
@@ -200,7 +197,32 @@ boost::shared_array<SharedVector> MatPsi::tei_alluniqJK() {
             int j = intIter.j();
             int k = intIter.k();
             int l = intIter.l();
-            JKvecs[0]->set(ij2I( ij2I(i, j), ij2I(k, l) ), buffer[intIter.index()] );
+            matpt[ l+nbf_*(k+nbf_*(j+nbf_*i)) ] = buffer[intIter.index()];
+            matpt[ l+nbf_*(k+nbf_*(i+nbf_*j)) ] = buffer[intIter.index()];
+            matpt[ k+nbf_*(l+nbf_*(j+nbf_*i)) ] = buffer[intIter.index()];
+            matpt[ k+nbf_*(l+nbf_*(i+nbf_*j)) ] = buffer[intIter.index()];
+            matpt[ j+nbf_*(i+nbf_*(l+nbf_*k)) ] = buffer[intIter.index()];
+            matpt[ j+nbf_*(i+nbf_*(k+nbf_*l)) ] = buffer[intIter.index()];
+            matpt[ i+nbf_*(j+nbf_*(l+nbf_*k)) ] = buffer[intIter.index()];
+            matpt[ i+nbf_*(j+nbf_*(k+nbf_*l)) ] = buffer[intIter.index()];
+        }
+    }
+}
+
+void MatPsi::tei_alluniqJK(double* matptJ, double* matptK) {
+    AOShellCombinationsIterator shellIter = intfac_->shells_iterator();
+    const double *buffer = eri_->buffer();
+    for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
+        // Compute quartet
+        eri_->compute_shell(shellIter);
+        // From the quartet get all the integrals
+        AOIntegralsIterator intIter = shellIter.integrals_iterator();
+        for (intIter.first(); intIter.is_done() == false; intIter.next()) {
+            int i = intIter.i();
+            int j = intIter.j();
+            int k = intIter.k();
+            int l = intIter.l();
+            matptJ[ij2I( ij2I(i, j), ij2I(k, l) )] = buffer[intIter.index()];
         }
     }
     for (shellIter.first(); shellIter.is_done() == false; shellIter.next()) {
@@ -212,10 +234,9 @@ boost::shared_array<SharedVector> MatPsi::tei_alluniqJK() {
             int j = intIter.j();
             int k = intIter.k();
             int l = intIter.l();
-            JKvecs[1]->set( ij2I( ij2I(i, j), ij2I(k, l) ), JKvecs[0]->get( ij2I( ij2I(i, l), ij2I(k, j) ) ) + JKvecs[0]->get( ij2I( ij2I(i, k), ij2I(j, l) ) ) );
+            matptK[ij2I( ij2I(i, j), ij2I(k, l) )] = matptJ[ij2I( ij2I(i, l), ij2I(k, j) )] + matptJ[ij2I( ij2I(i, k), ij2I(j, l) )];
         }
     }
-    return JKvecs;
 }
 
 void MatPsi::init_directjk(double cutoff) {

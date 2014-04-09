@@ -32,7 +32,7 @@ void OutputMatrix(mxArray*& Mat_m, SharedMatrix Mat_c) {
 
 void OutputVector(mxArray*& Mat_m, SharedVector Vec_c) {
 	int dim = Vec_c->dim();
-	Mat_m = mxCreateDoubleMatrix( dim, 1, mxREAL);
+	Mat_m = mxCreateDoubleMatrix( 1, dim, mxREAL);
 	double* Mat_m_pt = mxGetPr(Mat_m);
 	double* Vec_c_pt = Vec_c->pointer();
 	for(int i = 0; i < dim; i++) {
@@ -283,13 +283,38 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // tei_uniqN 
+    if (!strcmp("tei_uniqN", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("tei_uniqN: Unexpected arguments.");
+        // Call the method
+        OutputScalar(plhs[0], (double)MatPsi_obj->tei_uniqN());
+        return;
+    }
+    
     // tei_alluniq 
     if (!strcmp("tei_alluniq", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("tei_alluniq: Unexpected arguments.");
         // Call the method
-        OutputVector(plhs[0], MatPsi_obj->tei_alluniq());
+        plhs[0] = mxCreateDoubleMatrix( 1, MatPsi_obj->tei_uniqN(), mxREAL);
+        double* matpt = mxGetPr(plhs[0]);
+        MatPsi_obj->tei_alluniq(matpt);
+        return;
+    }
+    
+    // tei_allfull 
+    if (!strcmp("tei_allfull", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("tei_alluniq: Unexpected arguments.");
+        // Call the method
+        int dims[4] = {MatPsi_obj->nbasis(), MatPsi_obj->nbasis(), MatPsi_obj->nbasis(), MatPsi_obj->nbasis()};
+        plhs[0] = mxCreateNumericArray(4, dims, mxDOUBLE_CLASS, mxREAL);
+        double* matpt = mxGetPr(plhs[0]);
+        MatPsi_obj->tei_allfull(matpt);
         return;
     }
     
@@ -299,9 +324,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("tei_alluniqJK: Unexpected arguments.");
         // Call the method
-        boost::shared_array<SharedVector> JKvecs = MatPsi_obj->tei_alluniqJK();
-        OutputVector(plhs[0], JKvecs[0]);
-        OutputVector(plhs[1], JKvecs[1]);
+        plhs[0] = mxCreateDoubleMatrix( 1, MatPsi_obj->tei_uniqN(), mxREAL);
+        double* matptJ = mxGetPr(plhs[0]);
+        plhs[1] = mxCreateDoubleMatrix( 1, MatPsi_obj->tei_uniqN(), mxREAL);
+        double* matptK = mxGetPr(plhs[1]);
+        MatPsi_obj->tei_alluniqJK(matptJ, matptK);
         return;
     }
     

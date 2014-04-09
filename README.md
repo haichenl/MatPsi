@@ -133,18 +133,31 @@ charge magnitude; x, y, z are Cartesian coordinates of the point charge.
 
     Notice that all indices are in a cell array. 
 
-2. tei_alluniq: All unique two-electron interaction integrals. No geometrical symmetry is considered. Be careful as it consumes 
+2. tei_uniqN: Total number of unique two-electron interaction integrals. No geometrical symmetry is considered. 
+
+    ```
+    >> matpsi.tei_uniqN(); 
+    ```
+
+3. tei_alluniq: All unique two-electron interaction integrals. No geometrical symmetry is considered. Be careful as it consumes 
 a huge amount of memory. 
 
     ```
     >> matpsi.tei_alluniq(); 
     ```
 
-3. tei_alluniqJK: Still all unique two-electron interaction integrals but ordered and summed in quick forming of 
+4. tei_alluniqJK: Still all unique two-electron interaction integrals but ordered and summed in quick forming of 
 the exchange energy matrix K. See Developer's Note for detailed discussions. 
 
     ```
     >> [Jvec, Kvec] = matpsi.tei_alluniqJK(); 
+    ```
+
+5. tei_allfull: Full, 4-D two-electron interaction integrals. No geometrical symmetry is considered. Be careful as it consumes 
+a really huge amount of memory. 
+
+    ```
+    >> matpsi.tei_allfull(); 
     ```
 
 ####SCF related 

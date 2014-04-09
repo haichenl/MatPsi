@@ -120,11 +120,17 @@ public:
     // compute the 4-indexed two-electron integral H2(i, j, k, l) 
     double tei_ijkl(int i, int j, int k, int l);
     
+    // number of unique two-electron integrals 
+    int tei_uniqN();
+    
     // compute all unique two-electron integrals and put them in a vector; be careful as it costs a huge amount of memory 
-    SharedVector tei_alluniq();
+    void tei_alluniq(double* matpt);
+    
+    // compute all, full, nbasis by nbasis by nbasis by nbasis two-electron integrals and put them in a vector; be careful as it costs a super huge amount of memory 
+    void tei_allfull(double* matpt);
     
     // compute all unique two-electron integrals and pre-arrange them for the forming of J and K 
-    boost::shared_array<SharedVector> tei_alluniqJK();
+    void tei_alluniqJK(double* matptJ, double* matptK);
     
     // SCF related 
     // for restricted Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
