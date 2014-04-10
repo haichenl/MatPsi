@@ -114,9 +114,19 @@ classdef MatPsi < handle
         end
         
         %% SCF related 
-        % HFnosymmMO2G, (nbasis, nbasis) matrix 
-        function varargout = HFnosymmMO2G(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('HFnosymmMO2G', this.objectHandle, varargin{:});
+        % OccMO2J, (nbasis, nbasis) matrix 
+        function varargout = OccMO2J(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('OccMO2J', this.objectHandle, varargin{:});
+        end
+        
+        % OccMO2K, (nbasis, nbasis) matrix 
+        function varargout = OccMO2K(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('OccMO2K', this.objectHandle, varargin{:});
+        end
+        
+        % OccMO2G, (nbasis, nbasis) matrix 
+        function varargout = OccMO2G(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('OccMO2G', this.objectHandle, varargin{:});
         end
         
         % DirectRHF, 1 double 
@@ -147,6 +157,16 @@ classdef MatPsi < handle
         % H1Matrix, (nbasis, nbasis) matrix  
         function varargout = H1Matrix(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('H1Matrix', this.objectHandle, varargin{:});
+        end
+        
+        % JMatrix, (nbasis, nbasis) matrix  
+        function varargout = JMatrix(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('JMatrix', this.objectHandle, varargin{:});
+        end
+        
+        % KMatrix, (nbasis, nbasis) matrix  
+        function varargout = KMatrix(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('KMatrix', this.objectHandle, varargin{:});
         end
         
         % FockMatrix, (nbasis, nbasis) matrix  

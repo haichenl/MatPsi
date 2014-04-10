@@ -44,7 +44,11 @@ protected:
     SharedMatrix S_;
     /// The inverse square root of the overlap matrix
     SharedMatrix X_;
-    /// The Fock Matrix
+    /// The two-electron Coulomb matrix J 
+    SharedMatrix J_;
+    /// The two-electron exchange matrix K 
+    SharedMatrix K_;
+    /// The Fock matrix
     SharedMatrix F_;
     /// The transformed Fock matrix
     SharedMatrix Ft_;
@@ -133,8 +137,14 @@ public:
     void tei_alluniqJK(double* matptJ, double* matptK);
     
     // SCF related 
+    // for restricted Hartree Fock, compute 2-electron Coulomb interaction J matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
+    SharedMatrix OccMO2J(SharedMatrix OccMO);
+    
+    // for restricted Hartree Fock, compute 2-electron exchange interaction K matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
+    SharedMatrix OccMO2K(SharedMatrix OccMO);
+    
     // for restricted Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
-    SharedMatrix HFnosymmMO2G(SharedMatrix coeff);
+    SharedMatrix OccMO2G(SharedMatrix OccMO);
     
     // direct restricted Hartree-Fock; super slow 
     double DirectRHF();
@@ -153,6 +163,12 @@ public:
     
     // restricted Hartree-Fock one-electron (core) Hamiltonian matrix 
     SharedMatrix H1Matrix();
+    
+    // restricted Hartree-Fock two-electron Coulomb matrix 
+    SharedMatrix JMatrix();
+    
+    // restricted Hartree-Fock two-electron exchange matrix 
+    SharedMatrix KMatrix();
     
     // restricted Hartree-Fock Fock matrix 
     SharedMatrix FockMatrix();

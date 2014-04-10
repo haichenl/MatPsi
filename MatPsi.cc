@@ -245,16 +245,37 @@ void MatPsi::init_directjk(double cutoff) {
     directjk_->remove_symmetry();
 }
 
-SharedMatrix MatPsi::HFnosymmMO2G(SharedMatrix MO) {
+SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
     init_directjk();
     std::vector<SharedMatrix>& C_left = directjk_->C_left();
     C_left.clear();
-    C_left.push_back(MO);
+    C_left.push_back(OccMO);
+    directjk_->compute();
+    SharedMatrix Jnew = directjk_->J()[0];
+    directjk_->finalize();
+    return Jnew;
+}
+
+SharedMatrix MatPsi::OccMO2K(SharedMatrix OccMO) {
+    init_directjk();
+    std::vector<SharedMatrix>& C_left = directjk_->C_left();
+    C_left.clear();
+    C_left.push_back(OccMO);
+    directjk_->compute();
+    SharedMatrix Knew = directjk_->K()[0];
+    directjk_->finalize();
+    return Knew;
+}
+
+SharedMatrix MatPsi::OccMO2G(SharedMatrix OccMO) {
+    init_directjk();
+    std::vector<SharedMatrix>& C_left = directjk_->C_left();
+    C_left.clear();
+    C_left.push_back(OccMO);
     directjk_->compute();
     SharedMatrix Gnew = directjk_->J()[0];
-    SharedMatrix Knew = directjk_->K()[0];
-    Knew->scale(-0.5);
-    Gnew->add(Knew);
+    Gnew->scale(2);
+    Gnew->subtract(directjk_->K()[0]);
     directjk_->finalize();
     return Gnew;
 }
@@ -387,6 +408,11 @@ double MatPsi::DirectRHF() {
 
         iter++;
     }
+    C_left.clear();
+    C_left.push_back(C_occ_);
+    directjk_->compute();
+    J_ = directjk_->J()[0];
+    K_ = directjk_->K()[0];
     directjk_->finalize();
     C_->gemm(false, false, 1.0, X_, Evecs, 0.0);
     Eorb_->copy(Evals.get());
@@ -431,6 +457,20 @@ SharedMatrix MatPsi::H1Matrix() {
         throw PSIEXCEPTION("H1Matrix: Hartree-Fock calculation has not been done.");
     }
     return H_; 
+}
+
+SharedMatrix MatPsi::JMatrix() { 
+    if(J_ == NULL) {
+        throw PSIEXCEPTION("JMatrix: Hartree-Fock calculation has not been done.");
+    }
+    return J_; 
+}
+
+SharedMatrix MatPsi::KMatrix() { 
+    if(K_ == NULL) {
+        throw PSIEXCEPTION("KMatrix: Hartree-Fock calculation has not been done.");
+    }
+    return K_; 
 }
 
 SharedMatrix MatPsi::FockMatrix() { 

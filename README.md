@@ -162,52 +162,82 @@ a really huge amount of memory.
 
 ####SCF related 
 
-1. HFnosymmMO2G: For Hartree Fock theory, form the 2-electron G = J - 1/2 * K matrix from occupied molecular orbital coefficients matrix. 
+1. OccMO2J: For restricted Hartree Fock theory, form the 2-electron Coulomb interaction J matrix from occupied molecular orbital coefficients matrix. 
 Direct algorithm. No geometrical symmetry is considered. 
 
     ```
-    >> matpsi.HFnosymmMO2G( { occMO } ); 
+    >> matpsi.OccMO2J( { OccMO } ); 
     ```
     
-    Notice that occMO is in a cell array and must have nbasis number of rows. 
+    Notice that OccMO is in a cell array and must have nbasis number of rows. 
 
-2. DirectRHF: Solve restricted Hartree-Fock functions and returns the final Hartree-Fock energy 
+2. OccMO2K: For restricted Hartree Fock theory, form the 2-electron exchange interaction K matrix from occupied molecular orbital coefficients matrix. 
+Direct algorithm. No geometrical symmetry is considered. 
+
+    ```
+    >> matpsi.OccMO2K( { OccMO } ); 
+    ```
+    
+    Notice that OccMO is in a cell array and must have nbasis number of rows. 
+
+3. OccMO2G: For restricted Hartree Fock theory, form the 2-electron G = 2 * J - K matrix from occupied molecular orbital coefficients matrix. 
+Direct algorithm. No geometrical symmetry is considered. 
+
+    ```
+    >> matpsi.OccMO2G( { OccMO } ); 
+    ```
+    
+    Notice that OccMO is in a cell array and must have nbasis number of rows. 
+
+4. DirectRHF: Solve restricted Hartree-Fock functions and returns the final Hartree-Fock energy 
 
     ```
     >> matpsi.DirectRHF(); 
     ```
 
-3. ERHF: Get the final restricted Hartree-Fock energy. Executable after DirectRHF. 
+5. ERHF: Get the final restricted Hartree-Fock energy. Executable after DirectRHF. 
 
     ```
     >> matpsi.ERHF(); 
     ```
 
-4. orbital: Restricted Hartree-Fock molecular orbital coefficients. Executable after DirectRHF. 
+6. orbital: Restricted Hartree-Fock molecular orbital coefficients. Executable after DirectRHF. 
 
     ```
     >> matpsi.orbital(); 
     ```
 
-5. Eorb: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after DirectRHF. 
+7. Eorb: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after DirectRHF. 
 
     ```
     >> matpsi.Eorb(); 
     ```
 
-6. density: Restricted Hartree-Fock density matrix. Executable after DirectRHF. 
+8. density: Restricted Hartree-Fock density matrix. Executable after DirectRHF. 
 
     ```
     >> matpsi.density(); 
     ```
 
-7. H1Matrix: One-electron (core) Hamiltonian matrix. Executable after DirectRHF. 
+9. H1Matrix: One-electron (core) Hamiltonian matrix. Executable after DirectRHF. 
 
     ```
     >> matpsi.H1Matrix(); 
     ```
 
-8. FockMatrix: Fock matrix. Executable after DirectRHF. 
+10. JMatrix: 2-electron Coulomb interaction J matrix. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.JMatrix(); 
+    ```
+
+11. KMatrix: 2-electron exchange interaction K matrix. Executable after DirectRHF. 
+
+    ```
+    >> matpsi.KMatrix(); 
+    ```
+
+12. FockMatrix: Fock matrix. Executable after DirectRHF. 
 
     ```
     >> matpsi.FockMatrix(); 

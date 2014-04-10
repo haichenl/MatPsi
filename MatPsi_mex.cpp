@@ -69,7 +69,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi(mol_string, basis_name));
         } 
         catch(...) {
-            mexErrMsgTxt("Constructor: Cell array {mol_string, basis_name} input expected.");
+            mexErrMsgTxt("Constructor failed. Sorry!!");
         }
         return;
     }
@@ -333,18 +333,48 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
     
     // SCF related 
-    // HFnosymmMO2G(nbasis, nbasis) 
-    if (!strcmp("HFnosymmMO2G", cmd)) {
+    // OccMO2J(nbasis, nbasis) 
+    if (!strcmp("OccMO2J", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("HFnosymmMO2G: Unexpected arguments.");
+            mexErrMsgTxt("OccMO2J: Unexpected arguments.");
         if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
-            mexErrMsgTxt("HFnosymmMO2G: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
+            mexErrMsgTxt("OccMO2J: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
         if ( mxGetM(mxGetCell(prhs[2], 0)) != MatPsi_obj->nbasis() )
-            mexErrMsgTxt("HFnosymmMO2G: MO matrix dimension does not agree.");
+            mexErrMsgTxt("OccMO2J: Occupied MO matrix dimension does not agree.");
         // Call the method
         mxArray* tmp = mxGetCell(prhs[2], 0);
-		OutputMatrix(plhs[0], MatPsi_obj->HFnosymmMO2G(InputMatrix(tmp)));
+		OutputMatrix(plhs[0], MatPsi_obj->OccMO2J(InputMatrix(tmp)));
+        return;
+    }
+    
+    // OccMO2K(nbasis, nbasis) 
+    if (!strcmp("OccMO2K", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("OccMO2K: Unexpected arguments.");
+        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
+            mexErrMsgTxt("OccMO2K: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
+        if ( mxGetM(mxGetCell(prhs[2], 0)) != MatPsi_obj->nbasis() )
+            mexErrMsgTxt("OccMO2K: Occupied MO matrix dimension does not agree.");
+        // Call the method
+        mxArray* tmp = mxGetCell(prhs[2], 0);
+		OutputMatrix(plhs[0], MatPsi_obj->OccMO2K(InputMatrix(tmp)));
+        return;
+    }
+    
+    // OccMO2G(nbasis, nbasis) 
+    if (!strcmp("OccMO2G", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("OccMO2G: Unexpected arguments.");
+        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
+            mexErrMsgTxt("OccMO2G: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
+        if ( mxGetM(mxGetCell(prhs[2], 0)) != MatPsi_obj->nbasis() )
+            mexErrMsgTxt("OccMO2G: Occupied MO matrix dimension does not agree.");
+        // Call the method
+        mxArray* tmp = mxGetCell(prhs[2], 0);
+		OutputMatrix(plhs[0], MatPsi_obj->OccMO2G(InputMatrix(tmp)));
         return;
     }
     
@@ -405,6 +435,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("H1Matrix: Unexpected arguments.");
         // Call the method
         OutputMatrix(plhs[0], MatPsi_obj->H1Matrix());
+        return;
+    }
+    
+    // JMatrix 
+    if (!strcmp("JMatrix", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("JMatrix: Unexpected arguments.");
+        // Call the method
+        OutputMatrix(plhs[0], MatPsi_obj->JMatrix());
+        return;
+    }
+    
+    // KMatrix 
+    if (!strcmp("KMatrix", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("KMatrix: Unexpected arguments.");
+        // Call the method
+        OutputMatrix(plhs[0], MatPsi_obj->KMatrix());
         return;
     }
     
