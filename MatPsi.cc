@@ -137,6 +137,15 @@ SharedMatrix MatPsi::potential_zxyz(const double* Zxyz_array) {
     return vZxyzMat;
 }
 
+SharedMatrix MatPsi::potential_zxyzlist(SharedMatrix Zxyz_list) {
+    boost::shared_ptr<OneBodyAOInt> viOBI(intfac_->ao_potential());
+    boost::shared_ptr<PotentialInt> viPtI = boost::static_pointer_cast<PotentialInt>(viOBI);
+    viPtI->set_charge_field(Zxyz_list);
+    SharedMatrix vZxyzListMat(matfac_->create_matrix("Potential_ZxyzList"));
+    viOBI->compute(vZxyzListMat);
+    return vZxyzListMat;
+}
+
 double MatPsi::tei_ijkl(int i, int j, int k, int l) {
     int ish = basis_->function_to_shell(i);
     int jsh = basis_->function_to_shell(j);

@@ -120,6 +120,9 @@ public:
     // compute from a given point charge the environment potential energy matrix ENVI
     SharedMatrix potential_zxyz(const double* Zxyz_array);
     
+    // compute from a given point charge list the environment potential energy matrix ENVI
+    SharedMatrix potential_zxyzlist(SharedMatrix Zxyz_list);
+    
     // Two-electron integrals 
     // compute the 4-indexed two-electron integral H2(i, j, k, l) 
     double tei_ijkl(int i, int j, int k, int l);

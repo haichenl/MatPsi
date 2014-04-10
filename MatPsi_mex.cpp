@@ -262,6 +262,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // potential_zxyzlist(nbasis, nbasis)
+    if (!strcmp("potential_zxyzlist", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("potential_zxyzlist: Unexpected arguments.");
+        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
+            mexErrMsgTxt("potential_zxyzlist: Cell array {Zxyz_mat} input expected.");
+        if ( mxGetN(mxGetCell(prhs[2], 0)) != 4 )
+            mexErrMsgTxt("potential_zxyzlist: Zxyz list matrix dimension does not agree.");
+        // Call the method
+        mxArray* tmp = mxGetCell(prhs[2], 0);
+		OutputMatrix(plhs[0], MatPsi_obj->potential_zxyzlist(InputMatrix(tmp)));
+        return;
+    }
+    
     // Two-electron integrals 
     // tei_ijkl
     if (!strcmp("tei_ijkl", cmd)) {
