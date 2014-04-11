@@ -148,9 +148,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("coord: Unexpected arguments.");
         // Call the method
-        plhs[0] = mxCreateDoubleMatrix(MatPsi_obj->natom(), 3, mxREAL);
-        double* matpt = mxGetPr(plhs[0]);
-        MatPsi_obj->coord(matpt);
+        OutputMatrix(plhs[0], MatPsi_obj->coord());
         return;
     }
     

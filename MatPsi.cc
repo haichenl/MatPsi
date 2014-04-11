@@ -54,14 +54,6 @@ MatPsi::MatPsi(boost::shared_ptr<MatPsi> inputMatPsi) {
     directjk_ = inputMatPsi->directjk_;
 }
 
-void MatPsi::coord(double* matpt) { 
-    Matrix geom = molecule_->geometry();
-    double** cpt = geom.pointer();
-    for(int i = 0; i < 3; i++)
-        for(int j = 0; j < natom(); j++)
-            *matpt++ = cpt[j][i]; // Matlab loops over a column first, but C++ loops over a row first 
-}
-
 SharedVector MatPsi::Zlist() {
     SharedVector zlistvec(new Vector(molecule_->natom()));
     for(int i = 0; i < molecule_->natom(); i++) {

@@ -83,7 +83,7 @@ public:
     int natom() { return molecule_->natom(); }
     
     // atom coordinates 
-    void coord(double* matpt);
+    SharedMatrix coord() { return molecule_->geometry().clone(); }
     
     // nuclear repulsion energy 
     double Enuc() { return molecule_->nuclear_repulsion_energy(); }
