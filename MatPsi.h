@@ -83,7 +83,7 @@ public:
     int natom() { return molecule_->natom(); }
     
     // atom coordinates 
-    SharedMatrix coord() { return (molecule_->geometry()).clone(); }
+    void coord(double* matpt);
     
     // nuclear repulsion energy 
     double Enuc() { return molecule_->nuclear_repulsion_energy(); }
@@ -113,6 +113,9 @@ public:
     
     // compute the total potential energy matrix EN 
     SharedMatrix potential();
+    
+    // compute the dipole integrals 
+    std::vector<SharedMatrix> dipole();
     
     // compute the atom-separated potential energy matrix ENI 
     boost::shared_array<SharedMatrix> potential_sep();

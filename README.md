@@ -116,11 +116,18 @@ Construct from an existing MatPsi object.
     >> matpsi.potential_sep(); 
     ```
 
-5. potential_zxyz: Environment potential energy matrix (ENVI) for a given point charge in the format of {Z, x, y, z}; Z stands for 
-charge magnitude; x, y, z are Cartesian coordinates of the point charge. 
+5. potential_zxyz: Environment potential energy matrix for a given point charge in the format of {Z, x, y, z}; Z stands for 
+charge magnitude; x, y, z are Cartesian coordinates of the point charge. Use it for separated environment potential matrices. 
 
     ```
     >> matpsi.potential_zxyz( {Z, x, y, z} ); 
+    ```
+
+6. potential_zxyzlist: Environment potential energy matrix (ENVI) for a list of point charges in the format of ZxyzMatrix = [Z1 x1 y1 z1; Z2 x2 y2 z2; ...]; Zi stands for 
+charge magnitude; xi, yi, zi are Cartesian coordinates of point charges. Use for the summed environment potential matrix. 
+
+    ```
+    >> matpsi.potential_zxyzlist( {ZxyzMatrix} ); 
     ```
 
 ####Two-electron integrals 
@@ -309,5 +316,12 @@ restore this vector into an (upper case) N by N (N = n*(n+1)/2, n is the number 
 the density matrix into an N-length column vector and scale it by C(J) = 2 or C(K) = -1/2 and scale again all of the diagonal elements by 1/2, 
 then time the N by N matrix by this density vector. In the real algorithm we can avoid the "restore", or Hermitianize, step and 
 save some memory as well as sacrifice some speed, though. 
+
+Apr. 11: To correctly input/output matrices, we have to be aware of the following. 
+
+If we are going to use ```double* pointer; pointer++;``` to loop over all elements of a matrix, the pointer get from the Matlab mex function 
+```double* mxGetPr(mxArray*)``` will first go through a column, i.e. mat(1, 1)->mat(2, 1)->mat(3, 1)... etc.; but the C++ double* pointer will 
+first go through a row, i.e. mat[0][0]->mat[0][1]->mat[0][2]... etc. See ```SharedMatrix InputMatrix(mxArray*& Mat_m)``` in MatPsi_mex.cpp 
+for an appropriate way to deal with that. 
 
 

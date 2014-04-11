@@ -92,6 +92,11 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('potential_zxyzlist', this.objectHandle, varargin{:});
         end
         
+        % dipole, 3 (nbasis, nbasis) matrix 
+        function varargout = dipole(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('dipole', this.objectHandle, varargin{:});
+        end
+        
         %% Two-electron integrals 
         % tei_ijkl, 1 double 
         function varargout = tei_ijkl(this, varargin)

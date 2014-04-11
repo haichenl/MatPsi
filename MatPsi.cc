@@ -54,6 +54,14 @@ MatPsi::MatPsi(boost::shared_ptr<MatPsi> inputMatPsi) {
     directjk_ = inputMatPsi->directjk_;
 }
 
+void MatPsi::coord(double* matpt) { 
+    Matrix geom = molecule_->geometry();
+    double** cpt = geom.pointer();
+    for(int i = 0; i < 3; i++)
+        for(int j = 0; j < natom(); j++)
+            *matpt++ = cpt[j][i]; // Matlab loops over a column first, but C++ loops over a row first 
+}
+
 SharedVector MatPsi::Zlist() {
     SharedVector zlistvec(new Vector(molecule_->natom()));
     for(int i = 0; i < molecule_->natom(); i++) {
@@ -106,6 +114,19 @@ SharedMatrix MatPsi::potential() {
     boost::shared_ptr<OneBodyAOInt> vOBI(intfac_->ao_potential());
     vOBI->compute(vMat);
     return vMat;
+}
+
+std::vector<SharedMatrix> MatPsi::dipole() {
+    std::vector<SharedMatrix> ao_dipole;
+    SharedMatrix dipole_x(matfac_->create_matrix("Dipole x"));
+    SharedMatrix dipole_y(matfac_->create_matrix("Dipole y"));
+    SharedMatrix dipole_z(matfac_->create_matrix("Dipole z"));
+    ao_dipole.push_back(dipole_x);
+    ao_dipole.push_back(dipole_y);
+    ao_dipole.push_back(dipole_z);
+    boost::shared_ptr<OneBodyAOInt> dipoleOBI(intfac_->ao_dipole());
+    dipoleOBI->compute(ao_dipole);
+    return ao_dipole;
 }
 
 boost::shared_array<SharedMatrix> MatPsi::potential_sep() {
