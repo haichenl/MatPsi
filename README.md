@@ -58,7 +58,7 @@ Construct from an existing MatPsi object.
     >> matpsi.nelec(); 
     ```
 
-3. coord: Atom Cartesian coordinates. 
+3. coord: Atom Cartesian coordinates. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__  
 
     ```
     >> matpsi.coord(); 
@@ -128,6 +128,12 @@ charge magnitude; xi, yi, zi are Cartesian coordinates of point charges. Use for
 
     ```
     >> matpsi.potential_zxyzlist( {ZxyzMatrix} ); 
+    ```
+
+7. dipole: Dipole integrals. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__ 
+
+    ```
+    >> [x y z] = matpsi.dipole(); 
     ```
 
 ####Two-electron integrals 

@@ -91,6 +91,7 @@ SharedMatrix MatPsi::overlap() {
     SharedMatrix sMat(matfac_->create_matrix("Overlap"));
     boost::shared_ptr<OneBodyAOInt> sOBI(intfac_->ao_overlap());
     sOBI->compute(sMat);
+    sMat->hermitivitize();
     return sMat;
 }
 
@@ -98,6 +99,7 @@ SharedMatrix MatPsi::kinetic() {
     SharedMatrix tMat(matfac_->create_matrix("Kinetic"));
     boost::shared_ptr<OneBodyAOInt> tOBI(intfac_->ao_kinetic());
     tOBI->compute(tMat);
+    tMat->hermitivitize();
     return tMat;
 }
 
@@ -105,6 +107,7 @@ SharedMatrix MatPsi::potential() {
     SharedMatrix vMat(matfac_->create_matrix("Potential"));
     boost::shared_ptr<OneBodyAOInt> vOBI(intfac_->ao_potential());
     vOBI->compute(vMat);
+    vMat->hermitivitize();
     return vMat;
 }
 
@@ -118,6 +121,9 @@ std::vector<SharedMatrix> MatPsi::dipole() {
     ao_dipole.push_back(dipole_z);
     boost::shared_ptr<OneBodyAOInt> dipoleOBI(intfac_->ao_dipole());
     dipoleOBI->compute(ao_dipole);
+    ao_dipole[0]->hermitivitize();
+    ao_dipole[1]->hermitivitize();
+    ao_dipole[2]->hermitivitize();
     return ao_dipole;
 }
 
@@ -134,6 +140,7 @@ boost::shared_array<SharedMatrix> MatPsi::potential_sep() {
         viPtI->set_charge_field(Zxyz_rowi);
         viMatArray[i] = matfac_->create_shared_matrix("potential_sep");
         viOBI->compute(viMatArray[i]);
+        viMatArray[i]->hermitivitize();
     }
     return viMatArray;
 }
@@ -147,6 +154,7 @@ SharedMatrix MatPsi::potential_zxyz(const double* Zxyz_array) {
     viPtI->set_charge_field(Zxyz_row);
     SharedMatrix vZxyzMat(matfac_->create_matrix("Potential_Zxyz"));
     viOBI->compute(vZxyzMat);
+    vZxyzMat->hermitivitize();
     return vZxyzMat;
 }
 
@@ -156,6 +164,7 @@ SharedMatrix MatPsi::potential_zxyzlist(SharedMatrix Zxyz_list) {
     viPtI->set_charge_field(Zxyz_list);
     SharedMatrix vZxyzListMat(matfac_->create_matrix("Potential_ZxyzList"));
     viOBI->compute(vZxyzListMat);
+    vZxyzListMat->hermitivitize();
     return vZxyzListMat;
 }
 
@@ -274,6 +283,7 @@ SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
     C_left.push_back(OccMO);
     directjk_->compute();
     SharedMatrix Jnew = directjk_->J()[0];
+    Jnew->hermitivitize();
     directjk_->finalize();
     return Jnew;
 }
@@ -285,6 +295,7 @@ SharedMatrix MatPsi::OccMO2K(SharedMatrix OccMO) {
     C_left.push_back(OccMO);
     directjk_->compute();
     SharedMatrix Knew = directjk_->K()[0];
+    Knew->hermitivitize();
     directjk_->finalize();
     return Knew;
 }
@@ -298,6 +309,7 @@ SharedMatrix MatPsi::OccMO2G(SharedMatrix OccMO) {
     SharedMatrix Gnew = directjk_->J()[0];
     Gnew->scale(2);
     Gnew->subtract(directjk_->K()[0]);
+    Gnew->hermitivitize();
     directjk_->finalize();
     return Gnew;
 }
