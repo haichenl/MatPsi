@@ -202,58 +202,64 @@ Direct algorithm. No geometrical symmetry is considered.
     
     Notice that OccMO is in a cell array and must have nbasis number of rows. 
 
-4. DirectRHF: Solve restricted Hartree-Fock functions and returns the final Hartree-Fock energy 
+4. RHF: Solve restricted Hartree-Fock functions and returns the final Hartree-Fock energy 
 
     ```
-    >> matpsi.DirectRHF(); 
+    >> matpsi.RHF(); 
     ```
 
-5. ERHF: Get the final restricted Hartree-Fock energy. Executable after DirectRHF. 
+5. RHF_finalize: Free some memory and disk space required by ```RHF()```. Right now executed automatically thus no need to call. 
 
     ```
-    >> matpsi.ERHF(); 
+    >> matpsi.RHF_finalize(); 
     ```
 
-6. orbital: Restricted Hartree-Fock molecular orbital coefficients. Executable after DirectRHF. 
+6. RHF_EHF: Get the final restricted Hartree-Fock energy. Executable after RHF. 
 
     ```
-    >> matpsi.orbital(); 
+    >> matpsi.RHF_EHF(); 
     ```
 
-7. Eorb: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after DirectRHF. 
+7. RHF_C: Restricted Hartree-Fock molecular orbital coefficients. Executable after RHF. 
 
     ```
-    >> matpsi.Eorb(); 
+    >> matpsi.RHF_C(); 
     ```
 
-8. density: Restricted Hartree-Fock density matrix. Executable after DirectRHF. 
+8. RHF_EMO: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after RHF. 
 
     ```
-    >> matpsi.density(); 
+    >> matpsi.RHF_EMO(); 
     ```
 
-9. H1Matrix: One-electron (core) Hamiltonian matrix. Executable after DirectRHF. 
+9. RHF_D: Restricted Hartree-Fock density matrix. Executable after RHF. 
 
     ```
-    >> matpsi.H1Matrix(); 
+    >> matpsi.RHF_D(); 
     ```
 
-10. JMatrix: 2-electron Coulomb interaction J matrix. Executable after DirectRHF. 
+10. RHF_H: One-electron (core) Hamiltonian matrix. Executable after RHF. 
 
     ```
-    >> matpsi.JMatrix(); 
+    >> matpsi.RHF_H(); 
     ```
 
-11. KMatrix: 2-electron exchange interaction K matrix. Executable after DirectRHF. 
+11. RHF_J: 2-electron Coulomb interaction J matrix. Executable after RHF. 
 
     ```
-    >> matpsi.KMatrix(); 
+    >> matpsi.RHF_J(); 
     ```
 
-12. FockMatrix: Fock matrix. Executable after DirectRHF. 
+12. RHF_K: 2-electron exchange interaction K matrix. Executable after RHF. 
 
     ```
-    >> matpsi.FockMatrix(); 
+    >> matpsi.RHF_K(); 
+    ```
+
+13. RHF_F: Fock matrix. Executable after RHF. 
+
+    ```
+    >> matpsi.RHF_F(); 
     ```
 
 ##TODO 
@@ -329,5 +335,8 @@ If we are going to use ```double* pointer; pointer++;``` to loop over all elemen
 ```double* mxGetPr(mxArray*)``` will first go through a column, i.e. mat(1, 1)->mat(2, 1)->mat(3, 1)... etc.; but the C++ double* pointer will 
 first go through a row, i.e. mat[0][0]->mat[0][1]->mat[0][2]... etc. See ```SharedMatrix InputMatrix(mxArray*& Mat_m)``` in MatPsi_mex.cpp 
 for an appropriate way to deal with that. 
+
+Apr. 13: ```<myhf.h>``` and ```<myrhf.h>``` are basically copied from ```<libscf_solver/hf.h>``` and ```<libscf_solver/rhf.h>``` with some matrix wiping 
+turned off and ```finalize()``` method re-claimed as ```public```, as well as canceling a python external field interface. 
 
 

@@ -5,78 +5,59 @@
 #include "mex.h"
 #include "class_handle.hpp"
 #include <boost/shared_array.hpp>
+#include <libpsio/psio.h>
+#include <libpsio/psio.hpp>
+#include <myrhf.h>
 
 using namespace std;
 using namespace psi;
 using namespace boost;
 
 namespace psi {
-    FILE* outfile = stdout;
-    char* psi_file_prefix = NULL;
+    FILE* outfile = fopen("/dev/null", "w");
+    //FILE* outfile = stdout;
+    char* psi_file_prefix = "matpsi";
     std::string outfile_name = "";
     extern int read_options(const std::string &name, Options & options, bool suppress_printing = false);
 }
 
 class MatPsi {
 protected:
+    Options options_; // for now, just use an independent Options object; 
+                      // in the future may be we should use independent Enviroment object as well 
+    
+    std::string fakepid_; // serves as a fake pid 
+    boost::shared_ptr<PSIO> psio_;
+    
+    std::string molstring_;
+    std::string basisname_;
+    
     boost::shared_ptr<Molecule> molecule_;
     boost::shared_ptr<BasisSet> basis_;
 	boost::shared_ptr<IntegralFactory> intfac_;
     boost::shared_ptr<TwoBodyAOInt> eri_;
 	boost::shared_ptr<MatrixFactory> matfac_;
     boost::shared_ptr<DirectJK> directjk_;
+    boost::shared_ptr<scf::myRHF> rhf_;
     
-    /// The number of doubly occupied orbitals
-    int ndocc_;
-    /// The number of basis functions
-    int nbf_;
-    /// The maximum number of iterations
-    int maxiter_;
-    /// The nuclear repulsion energy
-    double e_nuc_;
-    /// The convergence criterion for the density
-    double d_convergence_;
-    /// The convergence criterion for the energy
-    double e_convergence_;
-    /// The one electron integrals
-    SharedMatrix H_;
-    /// The overlap matrix
-    SharedMatrix S_;
-    /// The inverse square root of the overlap matrix
-    SharedMatrix X_;
-    /// The two-electron Coulomb matrix J 
-    SharedMatrix J_;
-    /// The two-electron exchange matrix K 
-    SharedMatrix K_;
-    /// The Fock matrix
-    SharedMatrix F_;
-    /// The transformed Fock matrix
-    SharedMatrix Ft_;
-    /// The MO coefficients
-    SharedMatrix C_;
-    /// The MO energies 
-    SharedVector Eorb_;
-    /// The occupied MO coefficients
-    SharedMatrix C_occ_;
-    /// The density matrix
-    SharedMatrix D_;
-    /// The restricted Hartree-Fock energy 
-    double ERHF_;
-    /// Forms the density matrix from the MO coefficients
-    void form_density();
-    /// Computes the electronic part of the SCF energy, and returns it
-    double compute_electronic_energy();
+    // common initializer for constructors 
+    void common_init(std::string mol_string, std::string basis_name, int ncores = 6, unsigned long int memory = 1000000000L);
+    
     /// initialize the directjk object 
-    void init_directjk(double cutoff = 1.0E-12);
+    void init_directjk(SharedMatrix OccMO, double cutoff = 1.0E-12);
     
 public:
     // constructor; takes in 2 strings and parse them 
-    MatPsi(std::string mol_string, std::string basis_name, int ncores = 6, unsigned long int memory = 500000000L);
+    MatPsi(std::string mol_string, std::string basis_name);
 	
     // copy constructor 
-	MatPsi(boost::shared_ptr<MatPsi> inputMatPsi);
+	MatPsi(MatPsi* inputMatPsi);
 	
-	~MatPsi() {}
+    // destructor 
+	~MatPsi();
+    
+    // global molecule is shared among all instances, this method is for debugging 
+    void testmol() {Process::environment.molecule()->print();}
     
     // Molecule properties 
     // number of atoms 
@@ -152,31 +133,34 @@ public:
     // for restricted Hartree Fock, compute 2-electron G matrix from occupied molecular orbital coefficient matrix, direct algorithm, consider no geometrical symmetry 
     SharedMatrix OccMO2G(SharedMatrix OccMO);
     
-    // direct restricted Hartree-Fock; super slow 
-    double DirectRHF();
+    // restricted Hartree-Fock; quick but uses our filesystem and causes a lot of risky issues 
+    double RHF();
+    
+    // release memory and clean temporary files for Hartree-Fock 
+    void RHF_finalize();
     
     // restricted Hartree-Fock energy 
-    double ERHF();
+    double RHF_EHF();
     
     // restricted Hartree-Fock molecular orbitals 
-    SharedMatrix orbital();
+    SharedMatrix RHF_C();
     
     // restricted Hartree-Fock molecular orbital energies 
-    SharedVector Eorb();
+    SharedVector RHF_EMO();
     
     // restricted Hartree-Fock density matrix 
-    SharedMatrix density();
+    SharedMatrix RHF_D();
     
     // restricted Hartree-Fock one-electron (core) Hamiltonian matrix 
-    SharedMatrix H1Matrix();
+    SharedMatrix RHF_H();
     
     // restricted Hartree-Fock two-electron Coulomb matrix 
-    SharedMatrix JMatrix();
+    SharedMatrix RHF_J();
     
     // restricted Hartree-Fock two-electron exchange matrix 
-    SharedMatrix KMatrix();
+    SharedMatrix RHF_K();
     
     // restricted Hartree-Fock Fock matrix 
-    SharedMatrix FockMatrix();
+    SharedMatrix RHF_F();
     
 };

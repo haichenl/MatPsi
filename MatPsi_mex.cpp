@@ -112,12 +112,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("Copy Constructor: One output expected.");
         try {
             // Return a handle to a new C++ instance
-			boost::shared_ptr<MatPsi> MatPsi_str(MatPsi_obj);
-            plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi(MatPsi_str));
+            plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi(MatPsi_obj));
         } 
         catch(...) {
             mexErrMsgTxt("Copy Constructor failed");
         }
+        return;
+    }
+    
+    // testmol
+    if (!strcmp("testmol", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("testmol: Unexpected arguments.");
+        // Call the method
+        MatPsi_obj->testmol();
         return;
     }
 	
@@ -419,93 +428,103 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
-    // DirectRHF
-    if (!strcmp("DirectRHF", cmd)) {
+    // RHF
+    if (!strcmp("RHF", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("DirectRHF: Unexpected arguments.");
+            mexErrMsgTxt("RHF: Unexpected arguments.");
         // Call the method
-        OutputScalar(plhs[0], MatPsi_obj->DirectRHF());
+        OutputScalar(plhs[0], MatPsi_obj->RHF());
         return;
     }
     
-    // ERHF
-    if (!strcmp("ERHF", cmd)) {
+    // RHF_finalize
+    if (!strcmp("RHF_finalize", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("ERHF: Unexpected arguments.");
+            mexErrMsgTxt("RHF_finalize: Unexpected arguments.");
         // Call the method
-        OutputScalar(plhs[0], MatPsi_obj->ERHF());
+        MatPsi_obj->RHF_finalize();
         return;
     }
     
-    // orbital 
-    if (!strcmp("orbital", cmd)) {
+    // RHF_EHF 
+    if (!strcmp("RHF_EHF", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("orbital: Unexpected arguments.");
+            mexErrMsgTxt("RHF_EHF: Unexpected arguments.");
         // Call the method
-        OutputMatrix(plhs[0], MatPsi_obj->orbital());
+        OutputScalar(plhs[0], MatPsi_obj->RHF_EHF());
         return;
     }
     
-    // Eorb 
-    if (!strcmp("Eorb", cmd)) {
+    // RHF_C 
+    if (!strcmp("RHF_C", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("Eorb: Unexpected arguments.");
+            mexErrMsgTxt("RHF_C: Unexpected arguments.");
         // Call the method
-        OutputVector(plhs[0], MatPsi_obj->Eorb());
+        OutputMatrix(plhs[0], MatPsi_obj->RHF_C());
         return;
     }
     
-    // density 
-    if (!strcmp("density", cmd)) {
+    // RHF_EMO 
+    if (!strcmp("RHF_EMO", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("density: Unexpected arguments.");
+            mexErrMsgTxt("RHF_EMO: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->density());
+        OutputVector(plhs[0], MatPsi_obj->RHF_EMO());
         return;
     }
     
-    // H1Matrix 
-    if (!strcmp("H1Matrix", cmd)) {
+    // RHF_D 
+    if (!strcmp("RHF_D", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("H1Matrix: Unexpected arguments.");
+            mexErrMsgTxt("RHF_density: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->H1Matrix());
+        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_D());
         return;
     }
     
-    // JMatrix 
-    if (!strcmp("JMatrix", cmd)) {
+    // RHF_H 
+    if (!strcmp("RHF_H", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("JMatrix: Unexpected arguments.");
+            mexErrMsgTxt("RHF_H: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->JMatrix());
+        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_H());
         return;
     }
     
-    // KMatrix 
-    if (!strcmp("KMatrix", cmd)) {
+    // RHF_J 
+    if (!strcmp("RHF_J", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("KMatrix: Unexpected arguments.");
+            mexErrMsgTxt("RHF_J: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->KMatrix());
+        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_J());
         return;
     }
     
-    // FockMatrix 
-    if (!strcmp("FockMatrix", cmd)) {
+    // RHF_K 
+    if (!strcmp("RHF_K", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("FockMatrix: Unexpected arguments.");
+            mexErrMsgTxt("RHF_K: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->FockMatrix());
+        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_K());
+        return;
+    }
+    
+    // RHF_F 
+    if (!strcmp("RHF_F", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("RHF_F: Unexpected arguments.");
+        // Call the method
+        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_F());
         return;
     }
     

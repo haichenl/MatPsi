@@ -19,6 +19,10 @@ classdef MatPsi < handle
             MatPsi_mex('delete', this.objectHandle);
         end
 
+        function varargout = testmol(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('testmol', this.objectHandle, varargin{:});
+        end
+        
         %% Molecule properties 
         % natom, 1 double 
         function varargout = natom(this, varargin)
@@ -139,49 +143,54 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('OccMO2G', this.objectHandle, varargin{:});
         end
         
-        % DirectRHF, 1 double 
-        function varargout = DirectRHF(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('DirectRHF', this.objectHandle, varargin{:});
+        % RHF, 1 double 
+        function varargout = RHF(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF', this.objectHandle, varargin{:});
         end
         
-        % ERHF, 1 double 
-        function varargout = ERHF(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('ERHF', this.objectHandle, varargin{:});
+        % RHF_finalize, nothing  
+        function varargout = RHF_finalize(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_finalize', this.objectHandle, varargin{:});
+        end 
+        
+        % RHF_EHF, 1 double 
+        function varargout = RHF_EHF(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_EHF', this.objectHandle, varargin{:});
         end
         
-        % orbital, (nbasis, nbasis) matrix  
-        function varargout = orbital(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('orbital', this.objectHandle, varargin{:});
+        % RHF_C, (nbasis, nbasis) matrix  
+        function varargout = RHF_C(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_C', this.objectHandle, varargin{:});
         end
         
-        % Eorb, (nbasis, 1) vector  
-        function varargout = Eorb(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('Eorb', this.objectHandle, varargin{:});
+        % RHF_EMO, (nbasis, 1) vector  
+        function varargout = RHF_EMO(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_EMO', this.objectHandle, varargin{:});
         end
         
-        % density, (nbasis, nbasis) matrix  
-        function varargout = density(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('density', this.objectHandle, varargin{:});
+        % RHF_D, (nbasis, nbasis) matrix  
+        function varargout = RHF_D(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_D', this.objectHandle, varargin{:});
         end
         
-        % H1Matrix, (nbasis, nbasis) matrix  
-        function varargout = H1Matrix(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('H1Matrix', this.objectHandle, varargin{:});
+        % RHF_H, (nbasis, nbasis) matrix  
+        function varargout = RHF_H(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_H', this.objectHandle, varargin{:});
         end
         
-        % JMatrix, (nbasis, nbasis) matrix  
-        function varargout = JMatrix(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('JMatrix', this.objectHandle, varargin{:});
+        % RHF_J, (nbasis, nbasis) matrix  
+        function varargout = RHF_J(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_J', this.objectHandle, varargin{:});
         end
         
-        % KMatrix, (nbasis, nbasis) matrix  
-        function varargout = KMatrix(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('KMatrix', this.objectHandle, varargin{:});
+        % RHF_K, (nbasis, nbasis) matrix  
+        function varargout = RHF_K(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_K', this.objectHandle, varargin{:});
         end
         
-        % FockMatrix, (nbasis, nbasis) matrix  
-        function varargout = FockMatrix(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('FockMatrix', this.objectHandle, varargin{:});
+        % RHF_F, (nbasis, nbasis) matrix  
+        function varargout = RHF_F(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHF_F', this.objectHandle, varargin{:});
         end
 
     end

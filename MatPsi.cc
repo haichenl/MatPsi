@@ -1,29 +1,63 @@
 // Please directly include this file in MatPsi_mex.cpp to make compilation easier... 
 
 // Constructor
-MatPsi::MatPsi(std::string mol_string, std::string basis_name, int ncores, unsigned long int memory) {
-    // necessary initializations
+MatPsi::MatPsi(std::string molstring, std::string basisname) {
+    common_init(molstring, basisname);
+}
+
+// copy constructor 
+MatPsi::MatPsi(MatPsi* inputMatPsi) {
+    common_init(inputMatPsi->molstring_, inputMatPsi->basisname_);
+}
+
+std::string tempname() {
+    // an ugly trick to get a temp file name.. subject to change 
+    char* trickbuffer = tempnam("/tmp/", "tmp");
+    std::string tempname_ = std::string(trickbuffer + 5); 
+    delete trickbuffer;
+    return tempname_;
+}
+
+void MatPsi::common_init(std::string molstring, std::string basisname, int ncores, unsigned long int memory) {
+    // some necessary initializations
     Process::environment.initialize();
     WorldComm = initialize_communicator(0, NULL);
     Process::environment.options.set_read_globals(true);
     read_options("", Process::environment.options, true);
     Process::environment.options.set_read_globals(false);
     
-    // set cores and memory 
-    Process::environment.set_n_threads(ncores);
-    Process::environment.set_memory(memory);
+    options_ = Process::environment.options;
+    options_.set_current_module("MatPsi");
     
     Wavefunction::initialize_singletons();
     
-    // create molecule object and set its basis set name 
-    molecule_ = psi::Molecule::create_molecule_from_string(mol_string);
-    molecule_->set_basis_all_atoms(basis_name);
+    // an ugly trick to get a temp file name.. subject to change 
+    fakepid_ = tempname();
     
-    // create basis object; use pure angular momentum functions (5d or 7f etc.) forever 
+    // initialize psio 
+    psio_init();
+    PSIO::shared_object()->set_pid(fakepid_);
+    psio_ = boost::shared_ptr<PSIO>(new PSIO);
+    psio_->set_pid(fakepid_);
+    
+    // create molecule object and set its basis set name 
+    molstring_ = molstring;
+    basisname_ = basisname;
+    molecule_ = psi::Molecule::create_molecule_from_string(molstring);
+    molecule_->set_basis_all_atoms(basisname);
+    
+    
+    // set cores and memory 
+    Process::environment.set_n_threads(ncores); // these values are shared among all instances, so better be constants 
+    Process::environment.set_memory(memory);
+    
+    // create basis object 
     boost::shared_ptr<BasisSetParser> parser(new Gaussian94BasisSetParser());
-    parser->force_puream_or_cartesian_ = true;
-    parser->forced_is_puream_ = true;
+    //parser->force_puream_or_cartesian_ = true;
+    //parser->forced_is_puream_ = true;
     basis_ = BasisSet::construct(parser, molecule_, "BASIS");
+    boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
+    molecule_->set_point_group(c1group); // creating basis set object change molecule's point group, for some reasons 
     
     // create integral factory object 
     intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
@@ -39,19 +73,12 @@ MatPsi::MatPsi(std::string mol_string, std::string basis_name, int ncores, unsig
     // create directJK object
     directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
     
-    // initialize Hartree-Fock energy 
-    ERHF_ = 0.0;
-    
 }
 
-// copy constructor 
-MatPsi::MatPsi(boost::shared_ptr<MatPsi> inputMatPsi) {
-    molecule_ = inputMatPsi->molecule_;
-    basis_ = inputMatPsi->basis_;
-    intfac_ = inputMatPsi->intfac_;
-    eri_ = inputMatPsi->eri_;
-    matfac_ = inputMatPsi->matfac_;
-    directjk_ = inputMatPsi->directjk_;
+// destructor 
+MatPsi::~MatPsi() {
+    if(rhf_ != NULL)
+        RHF_finalize();
 }
 
 SharedVector MatPsi::Zlist() {
@@ -270,17 +297,17 @@ void MatPsi::tei_alluniqJK(double* matptJ, double* matptK) {
     }
 }
 
-void MatPsi::init_directjk(double cutoff) {
+void MatPsi::init_directjk(SharedMatrix OccMO, double cutoff) {
     directjk_->set_cutoff(cutoff);
     directjk_->initialize();
     directjk_->remove_symmetry();
-}
-
-SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
-    init_directjk();
     std::vector<SharedMatrix>& C_left = directjk_->C_left();
     C_left.clear();
     C_left.push_back(OccMO);
+}
+
+SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
+    init_directjk(OccMO);
     directjk_->compute();
     SharedMatrix Jnew = directjk_->J()[0];
     Jnew->hermitivitize();
@@ -289,10 +316,7 @@ SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
 }
 
 SharedMatrix MatPsi::OccMO2K(SharedMatrix OccMO) {
-    init_directjk();
-    std::vector<SharedMatrix>& C_left = directjk_->C_left();
-    C_left.clear();
-    C_left.push_back(OccMO);
+    init_directjk(OccMO);
     directjk_->compute();
     SharedMatrix Knew = directjk_->K()[0];
     Knew->hermitivitize();
@@ -301,216 +325,89 @@ SharedMatrix MatPsi::OccMO2K(SharedMatrix OccMO) {
 }
 
 SharedMatrix MatPsi::OccMO2G(SharedMatrix OccMO) {
-    init_directjk();
-    std::vector<SharedMatrix>& C_left = directjk_->C_left();
-    C_left.clear();
-    C_left.push_back(OccMO);
+    init_directjk(OccMO);
     directjk_->compute();
     SharedMatrix Gnew = directjk_->J()[0];
     Gnew->scale(2);
-    Gnew->subtract(directjk_->K()[0]);
+    Gnew->subtract(directjk_->K()[0]); // 2 J - K 
     Gnew->hermitivitize();
     directjk_->finalize();
     return Gnew;
 }
 
-void MatPsi::form_density()
-{
-    for(int p = 0; p < nbf_; ++p){
-        for(int q = 0; q < nbf_; ++q){
-            double val = 0.0;
-            for(int i = 0; i < ndocc_; ++i){
-                val += C_occ_->get(p, i) * C_occ_->get(q, i);
-            }
-            D_->set(p, q, val);
-        }
-    }   
+double MatPsi::RHF() {
+    psio_init(); // have to initialize psio again... 
+    PSIO::shared_object()->set_pid(fakepid_);
+    psio_ = boost::shared_ptr<PSIO>(new PSIO);
+    psio_->set_pid(fakepid_);
+    boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
+    molecule_->set_point_group(c1group); // for safety 
+    Process::environment.set_molecule(molecule_);
+    rhf_ = boost::shared_ptr<scf::myRHF>(new scf::myRHF(options_, psio_));
+    Process::environment.set_wavefunction(rhf_);
+    double Ehf = rhf_->compute_energy();
+    RHF_finalize();
+    return Ehf;
 }
 
-double MatPsi::compute_electronic_energy()
-{
-    Matrix HplusF;
-    HplusF.copy(H_);
-    HplusF.add(F_);
-    return D_->vector_dot(HplusF);    
+void MatPsi::RHF_finalize() {
+    rhf_->finalize();
+    PSIOManager::shared_object()->psiclean();
 }
 
-double MatPsi::DirectRHF() {
-
-    // Initializations 
-    maxiter_ = 100;
-    e_convergence_ = 1e-8;
-    d_convergence_ = 1e-8;
-    
-    nbf_ = basis_->nbf();
-    int nelec_ = nelec();
-    if(nelec_ % 2)
-        throw PSIEXCEPTION("This is only an RHF code, but you gave it an odd number of electrons.  Try again!");
-    ndocc_ = nelec_ / 2;
-    e_nuc_ = molecule_->nuclear_repulsion_energy();
-    
-    S_ = SharedMatrix(new Matrix("Overlap matrix", nbf_, nbf_));
-    H_ = SharedMatrix(new Matrix("Core Hamiltonian matrix", nbf_, nbf_));
-    boost::shared_ptr<OneBodyAOInt> sOBI(intfac_->ao_overlap());
-    boost::shared_ptr<OneBodyAOInt> tOBI(intfac_->ao_kinetic());
-    boost::shared_ptr<OneBodyAOInt> vOBI(intfac_->ao_potential());
-    SharedMatrix V = SharedMatrix(new Matrix("Potential integrals matrix", nbf_, nbf_));
-    sOBI->compute(S_);
-    tOBI->compute(H_);
-    vOBI->compute(V);
-    H_->add(V);
-    
-    // Allocate some matrices
-    X_  = SharedMatrix(new Matrix("S^-1/2", nbf_, nbf_));
-    F_  = SharedMatrix(new Matrix("Fock matrix", nbf_, nbf_));
-    Ft_ = SharedMatrix(new Matrix("Transformed Fock matrix", nbf_, nbf_));
-    C_  = SharedMatrix(new Matrix("MO Coefficients_", nbf_, nbf_));
-    Eorb_  = SharedVector(new Vector("MO Energies_", nbf_));
-    C_occ_  = SharedMatrix(new Matrix("Occupied MO Coefficients_", nbf_, ndocc_));
-    D_  = SharedMatrix(new Matrix("The Density Matrix", nbf_, nbf_));
-    SharedMatrix Temp1(new Matrix("Temporary Array 1", nbf_, nbf_));
-    SharedMatrix Temp2(new Matrix("Temporary Array 2", nbf_, nbf_));
-    SharedMatrix FDS(new Matrix("FDS", nbf_, nbf_));
-    SharedMatrix SDF(new Matrix("SDF", nbf_, nbf_));
-    SharedMatrix Evecs(new Matrix("Eigenvectors", nbf_, nbf_));
-    SharedVector Evals(new Vector("Eigenvalues", nbf_));
-
-    // Form the X_ matrix (S^-1/2)
-    S_->diagonalize(Evecs, Evals, ascending);
-    for(int p = 0; p < nbf_; ++p){
-        double val = 1.0 / sqrt(Evals->get(p));
-        Evals->set(p, val);
+double MatPsi::RHF_EHF() { 
+    if(rhf_ == NULL) { // a trick to determine whether Hartree-Fock has been performed 
+        throw PSIEXCEPTION("RHF_EHF: Hartree-Fock calculation has not been done.");
     }
-    Temp1->set_diagonal(Evals);
-    Temp2->gemm(false, true, 1.0, Temp1, Evecs, 0.0);
-    X_->gemm(false, false, 1.0, Evecs, Temp2, 0.0);
-    
-    F_->copy(H_);
-    Ft_->transform(F_, X_);
-    Ft_->diagonalize(Evecs, Evals, ascending);
-
-    C_occ_->gemm(false, false, 1.0, X_, Evecs, 0.0);
-    form_density();
-
-    int iter = 1;
-    bool converged = false;
-    double e_old;
-    double e_new = compute_electronic_energy();
-    
-    init_directjk();
-    std::vector<SharedMatrix>& C_left = directjk_->C_left();
-    
-    while(!converged && iter < maxiter_){
-        e_old = e_new;
-
-        // Add the core Hamiltonian term to the Fock operator
-        F_->copy(H_);
-        
-        // Add the two electron terms to the Fock operator
-        C_left.clear();
-        C_left.push_back(C_occ_);
-        directjk_->compute();
-        Temp1 = directjk_->J()[0];
-        Temp1->scale(2);
-        F_->add(Temp1);
-        F_->subtract(directjk_->K()[0]);
-
-        // Transform the Fock operator and diagonalize it
-        Ft_->transform(F_, X_);
-        Ft_->diagonalize(Evecs, Evals, ascending);
-
-        // Form the orbitals from the eigenvectors of the transformed Fock matrix 
-        C_occ_->gemm(false, false, 1.0, X_, Evecs, 0.0);
-
-        // Rebuild the density using the new orbitals
-        form_density();
-
-        // Compute the energy
-        e_new = compute_electronic_energy();
-        double dE = e_new - e_old;
- 
-        // Compute the orbital gradient, FDS-SDF
-        Temp1->gemm(false, false, 1.0, D_, S_, 0.0);
-        FDS->gemm(false, false, 1.0, F_, Temp1, 0.0);
-        Temp1->gemm(false, false, 1.0, D_, F_, 0.0);
-        SDF->gemm(false, false, 1.0, S_, Temp1, 0.0);
-        Temp1->copy(FDS);
-        Temp1->subtract(SDF);
-        double dRMS = Temp1->rms();
-     
-        converged = (fabs(dE) < e_convergence_) && (dRMS < d_convergence_);
-
-        iter++;
-    }
-    C_left.clear();
-    C_left.push_back(C_occ_);
-    directjk_->compute();
-    J_ = directjk_->J()[0];
-    K_ = directjk_->K()[0];
-    directjk_->finalize();
-    C_->gemm(false, false, 1.0, X_, Evecs, 0.0);
-    Eorb_->copy(Evals.get());
-    
-    if(!converged)
-        throw PSIEXCEPTION("The SCF iterations did not converge.");
-    
-    ERHF_ = e_nuc_ + e_new;
-    return ERHF_;
+    return rhf_->EHF(); 
 }
 
-double MatPsi::ERHF() { 
-    if(F_ == NULL) { // a trick to determine whether Hartree-Fock has been performed 
-        throw PSIEXCEPTION("ERHF: Hartree-Fock calculation has not been done.");
+SharedMatrix MatPsi::RHF_C() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_C: Hartree-Fock calculation has not been done.");
     }
-    return ERHF_; 
+    return rhf_->Ca(); 
 }
 
-SharedMatrix MatPsi::orbital() { 
-    if(C_ == NULL) {
-        throw PSIEXCEPTION("orbital: Hartree-Fock calculation has not been done.");
+SharedVector MatPsi::RHF_EMO() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_EMO: Hartree-Fock calculation has not been done.");
     }
-    return C_; 
+    return rhf_->epsilon_a(); 
 }
 
-SharedVector MatPsi::Eorb() { 
-    if(Eorb_ == NULL) {
-        throw PSIEXCEPTION("Eorb: Hartree-Fock calculation has not been done.");
+SharedMatrix MatPsi::RHF_D() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_D: Hartree-Fock calculation has not been done.");
     }
-    return Eorb_; 
+    return rhf_->Da(); 
 }
 
-SharedMatrix MatPsi::density() { 
-    if(D_ == NULL) {
-        throw PSIEXCEPTION("density: Hartree-Fock calculation has not been done.");
+SharedMatrix MatPsi::RHF_H() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_H: Hartree-Fock calculation has not been done.");
     }
-    return D_; 
+    return rhf_->H(); 
 }
 
-SharedMatrix MatPsi::H1Matrix() { 
-    if(H_ == NULL) {
-        throw PSIEXCEPTION("H1Matrix: Hartree-Fock calculation has not been done.");
+SharedMatrix MatPsi::RHF_J() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_J: Hartree-Fock calculation has not been done.");
     }
-    return H_; 
+    return rhf_->J(); 
 }
 
-SharedMatrix MatPsi::JMatrix() { 
-    if(J_ == NULL) {
-        throw PSIEXCEPTION("JMatrix: Hartree-Fock calculation has not been done.");
+SharedMatrix MatPsi::RHF_K() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_K: Hartree-Fock calculation has not been done.");
     }
-    return J_; 
+    return rhf_->K(); 
 }
 
-SharedMatrix MatPsi::KMatrix() { 
-    if(K_ == NULL) {
-        throw PSIEXCEPTION("KMatrix: Hartree-Fock calculation has not been done.");
+SharedMatrix MatPsi::RHF_F() { 
+    if(rhf_ == NULL) {
+        throw PSIEXCEPTION("RHF_F: Hartree-Fock calculation has not been done.");
     }
-    return K_; 
-}
-
-SharedMatrix MatPsi::FockMatrix() { 
-    if(F_ == NULL) {
-        throw PSIEXCEPTION("FockMatrix: Hartree-Fock calculation has not been done.");
-    }
-    return F_; 
+    return rhf_->Fa(); 
 }
 
