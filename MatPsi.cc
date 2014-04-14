@@ -45,6 +45,7 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     basisname_ = basisname;
     molecule_ = psi::Molecule::create_molecule_from_string(molstring);
     molecule_->set_basis_all_atoms(basisname);
+    Process::environment.set_molecule(molecule_);
     
     
     // set cores and memory 
