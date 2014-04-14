@@ -25,6 +25,7 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     Process::environment.options.set_read_globals(true);
     read_options("", Process::environment.options, true);
     Process::environment.options.set_read_globals(false);
+    Process::environment.options.set_global_int("MAXITER", 40);
     
     options_ = Process::environment.options;
     options_.set_current_module("MatPsi");

@@ -41,7 +41,7 @@ protected:
     boost::shared_ptr<scf::myRHF> rhf_;
     
     // common initializer for constructors 
-    void common_init(std::string mol_string, std::string basis_name, int ncores = 6, unsigned long int memory = 1000000000L);
+    void common_init(std::string mol_string, std::string basis_name, int ncores = 4, unsigned long int memory = 1000000000L);
     
     /// initialize the directjk object 
     void init_directjk(SharedMatrix OccMO, double cutoff = 1.0E-12);
