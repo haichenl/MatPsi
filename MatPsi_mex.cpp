@@ -256,7 +256,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         int ncol = viMatArray[0]->ncol();
         int nrow = viMatArray[0]->nrow();
         int natom = MatPsi_obj->natom();
-        int dims[3] = {ncol, nrow, natom};
+        mwSize dims[3] = {ncol, nrow, natom};
         plhs[0] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
         double* matlab_pt = mxGetPr(plhs[0]);
         for(int iatom = 0; iatom < natom; iatom++) {
@@ -361,7 +361,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("tei_alluniq: Unexpected arguments.");
         // Call the method
-        int dims[4] = {MatPsi_obj->nbasis(), MatPsi_obj->nbasis(), MatPsi_obj->nbasis(), MatPsi_obj->nbasis()};
+        mwSize dims[4] = {MatPsi_obj->nbasis(), MatPsi_obj->nbasis(), MatPsi_obj->nbasis(), MatPsi_obj->nbasis()};
         plhs[0] = mxCreateNumericArray(4, dims, mxDOUBLE_CLASS, mxREAL);
         double* matpt = mxGetPr(plhs[0]);
         MatPsi_obj->tei_allfull(matpt);

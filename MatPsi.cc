@@ -338,10 +338,8 @@ SharedMatrix MatPsi::OccMO2G(SharedMatrix OccMO) {
 }
 
 double MatPsi::RHF() {
-    psio_init(); // have to initialize psio again... 
-    PSIO::shared_object()->set_pid(fakepid_);
-    psio_ = boost::shared_ptr<PSIO>(new PSIO);
-    psio_->set_pid(fakepid_);
+    PSIO::shared_object()->set_pid(fakepid_); // have to set pid again as some other instances are gonna change it, 
+                                              // and the JK object just stupidly uses the global psio object... 
     boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
     molecule_->set_point_group(c1group); // for safety 
     Process::environment.set_molecule(molecule_);
@@ -353,6 +351,7 @@ double MatPsi::RHF() {
 }
 
 void MatPsi::RHF_finalize() {
+    PSIO::shared_object()->set_pid(fakepid_);
     rhf_->finalize();
     PSIOManager::shared_object()->psiclean();
 }
