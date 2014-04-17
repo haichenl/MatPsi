@@ -7,7 +7,7 @@ using namespace std;
 using namespace psi;
 using namespace boost;
 
-SharedMatrix InputMatrix(mxArray*& Mat_m) {
+SharedMatrix InputMatrix(const mxArray*& Mat_m) {
 	int nrow = mxGetM(Mat_m);
 	int ncol = mxGetN(Mat_m);
     SharedMatrix Mat_c(new Matrix(nrow, ncol));
@@ -70,16 +70,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Check parameters
         if (nlhs != 1)
             mexErrMsgTxt("Constructor: One output expected.");
-        if (nrhs!=2 || !mxIsCell(prhs[1]) || mxGetNumberOfElements(prhs[1]) != 2)
-            mexErrMsgTxt("Constructor: Cell array {mol_string, basis_name} input expected.");
+        if (nrhs!=3 || !mxIsChar(prhs[1]) || !mxIsChar(prhs[2]))
+            mexErrMsgTxt("Constructor: MatPsi(mol_string, basis_name) input expected.");
         try {
             // Return a handle to a new C++ instance
-            mxArray *tmp;
-            tmp = mxGetCell(prhs[1], 0);
-            std::string mol_string = mxArrayToString(tmp);
-            tmp = mxGetCell(prhs[1], 1);
-            std::string basis_name = mxArrayToString(tmp);
-            plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi(mol_string, basis_name));
+            //std::string mol_string = mxArrayToString(tmp);
+            //std::string basis_name = mxArrayToString(tmp);
+            plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi((std::string)mxArrayToString(prhs[1]) , (std::string)mxArrayToString(prhs[2])));
         } 
         catch(...) {
             mexErrMsgTxt("Constructor failed. Sorry!!");
@@ -268,34 +265,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
-    // potential_zxyz(nbasis, nbasis)
-    if (!strcmp("potential_zxyz", cmd)) {
+    // potential_Zxyz(nbasis, nbasis)
+    if (!strcmp("potential_Zxyz", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("potential_zxyz: Unexpected arguments.");
-        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 4)
-            mexErrMsgTxt("potential_zxyz: Cell array {Z, x, y, z} input expected.");
+            mexErrMsgTxt("potential_Zxyz: Unexpected arguments.");
+        if (nrhs!=3)
+            mexErrMsgTxt("potential_Zxyz: potential_Zxyz(Zxyz_mat) input expected.");
+        if (mxGetN(prhs[2]) != 4)
+            mexErrMsgTxt("potential_Zxyz: Zxyz list matrix dimension does not agree.");
         // Call the method
-        double Zxyz_array[4];
-        for(int i = 0; i < 4; i++) {
-            Zxyz_array[i] = (double)mxGetScalar(mxGetCell(prhs[2], i));
-        }
-		OutputSymmMatrix(plhs[0], MatPsi_obj->potential_zxyz(Zxyz_array));
-        return;
-    }
-    
-    // potential_zxyzlist(nbasis, nbasis)
-    if (!strcmp("potential_zxyzlist", cmd)) {
-        // Check parameters
-        if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("potential_zxyzlist: Unexpected arguments.");
-        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
-            mexErrMsgTxt("potential_zxyzlist: Cell array {Zxyz_mat} input expected.");
-        if ( mxGetN(mxGetCell(prhs[2], 0)) != 4 )
-            mexErrMsgTxt("potential_zxyzlist: Zxyz list matrix dimension does not agree.");
-        // Call the method
-        mxArray* tmp = mxGetCell(prhs[2], 0);
-		OutputSymmMatrix(plhs[0], MatPsi_obj->potential_zxyzlist(InputMatrix(tmp)));
+        //mxArray* tmp = prhs[2];
+		OutputSymmMatrix(plhs[0], MatPsi_obj->potential_Zxyz(InputMatrix(prhs[2])));
         return;
     }
     
@@ -318,15 +299,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("tei_ijkl: Unexpected arguments.");
-        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 4)
-            mexErrMsgTxt("tei_ijkl: Cell array {i, j, k, l} input expected.");
+        if (nrhs!=6 || !mxIsDouble(prhs[2]) || !mxIsDouble(prhs[3]) || !mxIsDouble(prhs[4]) || !mxIsDouble(prhs[5]))
+            mexErrMsgTxt("tei_ijkl: tei_ijkl(i, j, k, l) input expected.");
         // Call the method
-        mxArray *tmp;
         int ind[4];
         for(int i = 0; i < 4; i++) {
-            tmp = mxGetCell(prhs[2], i);
-            ind[i] = (int)mxGetScalar(tmp) - 1; // -1 convert Matlab convention to C++ convention
-            if(ind[i] < 0 || ind[i] >= MatPsi_obj->nbasis())
+            ind[i] = (int)mxGetScalar(prhs[2+i]) - 1; // -1 convert Matlab convention to C++ convention
+        if(ind[i] < 0 || ind[i] >= MatPsi_obj->nbasis())
                 mexErrMsgTxt("tei_ijkl: Required index not within scale.");
         }
         OutputScalar(plhs[0], MatPsi_obj->tei_ijkl(ind[0], ind[1], ind[2], ind[3]));
@@ -388,13 +367,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("OccMO2J: Unexpected arguments.");
-        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
-            mexErrMsgTxt("OccMO2J: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
-        if ( mxGetM(mxGetCell(prhs[2], 0)) != MatPsi_obj->nbasis() )
-            mexErrMsgTxt("OccMO2J: Occupied MO matrix dimension does not agree.");
+        if (nrhs!=3 || mxGetM(prhs[2]) != MatPsi_obj->nbasis())
+            mexErrMsgTxt("OccMO2J: nbasis by noccupy matrix OccMO2J(MOmat) input expected.");
         // Call the method
-        mxArray* tmp = mxGetCell(prhs[2], 0);
-		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2J(InputMatrix(tmp)));
+		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2J(InputMatrix(prhs[2])));
         return;
     }
     
@@ -403,13 +379,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("OccMO2K: Unexpected arguments.");
-        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
-            mexErrMsgTxt("OccMO2K: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
-        if ( mxGetM(mxGetCell(prhs[2], 0)) != MatPsi_obj->nbasis() )
-            mexErrMsgTxt("OccMO2K: Occupied MO matrix dimension does not agree.");
+        if (nrhs!=3 || mxGetM(prhs[2]) != MatPsi_obj->nbasis())
+            mexErrMsgTxt("OccMO2K: nbasis by noccupy matrix OccMO2K(MOmat) input expected.");
         // Call the method
-        mxArray* tmp = mxGetCell(prhs[2], 0);
-		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2K(InputMatrix(tmp)));
+		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2K(InputMatrix(prhs[2])));
         return;
     }
     
@@ -418,13 +391,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("OccMO2G: Unexpected arguments.");
-        if (nrhs!=3 || !mxIsCell(prhs[2]) || mxGetNumberOfElements(prhs[2]) != 1)
-            mexErrMsgTxt("OccMO2G: Cell array containing a (nbasis by noccupy) matrix {MOmat} input expected.");
-        if ( mxGetM(mxGetCell(prhs[2], 0)) != MatPsi_obj->nbasis() )
-            mexErrMsgTxt("OccMO2G: Occupied MO matrix dimension does not agree.");
+        if (nrhs!=3 || mxGetM(prhs[2]) != MatPsi_obj->nbasis())
+            mexErrMsgTxt("OccMO2G: nbasis by noccupy matrix OccMO2G(MOmat) input expected.");
         // Call the method
-        mxArray* tmp = mxGetCell(prhs[2], 0);
-		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2G(InputMatrix(tmp)));
+		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2G(InputMatrix(prhs[2])));
         return;
     }
     

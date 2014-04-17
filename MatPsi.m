@@ -86,14 +86,9 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('potential_sep', this.objectHandle, varargin{:});
         end
         
-        % environment potential for a point charge, (nbasis, nbasis) matrix 
-        function varargout = potential_zxyz(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('potential_zxyz', this.objectHandle, varargin{:});
-        end
-        
         % environment potential for a list containing a lot of point charges, (nbasis, nbasis) matrix 
-        function varargout = potential_zxyzlist(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('potential_zxyzlist', this.objectHandle, varargin{:});
+        function varargout = potential_Zxyz(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('potential_Zxyz', this.objectHandle, varargin{:});
         end
         
         % dipole, 3 (nbasis, nbasis) matrix 

@@ -1,17 +1,20 @@
 MatPsi: An interface between Matlab and Psi4
 ======
 
+##Apr. 17: Fundamental UI change...please update 
+
+
 ##Compilation
 
 Please refer to complink.sh 
 
 ##Usage 
 
-Usage is (nearly) all of Matlab convention, except that all the function __input arguments__ have to be in __one cell array__: 
+Usage is (nearly) all of Matlab convention. There is no need to put input arguments in a cell array now. ~~, except that all the function __input arguments__ have to be in __one cell array__:~~ 
 
-    >> [output1, output2, ...] = matpsi.WhatEverFunction( {input1, input2, ...} );
+    >> [output1, output2, ...] = matpsi.WhatEverFunction(input1, input2, ...);
 
-This is assumed by _Example MATLAB class wrapper for a C++ class_ 's developer Oliver Woodford. 
+This work is based on _Example MATLAB class wrapper for a C++ class_ by Oliver Woodford. 
 See http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-wrapper-for-a-c++-class for more details. 
 
 ####Constructor 
@@ -33,10 +36,8 @@ basis_name =
 
 6-31g*
 
->> matpsi = MatPsi( {mol_string, basis_name} );
+>> matpsi = MatPsi(mol_string, basis_name);
 ```
-
-Notice that both strings are in a cell array. 
 
 ####Copy Constructor
 
@@ -116,21 +117,14 @@ Construct from an existing MatPsi object.
     >> matpsi.potential_sep(); 
     ```
 
-5. potential_zxyz: Environment potential energy matrix for a given point charge in the format of {Z, x, y, z}; Z stands for 
-charge magnitude; x, y, z are Cartesian coordinates of the point charge. Use it for separated environment potential matrices. 
-
-    ```
-    >> matpsi.potential_zxyz( {Z, x, y, z} ); 
-    ```
-
-6. potential_zxyzlist: Environment potential energy matrix (ENVI) for a list of point charges in the format of ZxyzMatrix = [Z1 x1 y1 z1; Z2 x2 y2 z2; ...]; Zi stands for 
+5. potential_Zxyz: Environment potential energy matrix (ENVI) for a list of point charges in the format of ZxyzMatrix = [Z1 x1 y1 z1; Z2 x2 y2 z2; ...]; Zi stands for 
 charge magnitude; xi, yi, zi are Cartesian coordinates of point charges. Use for the summed environment potential matrix. 
 
     ```
-    >> matpsi.potential_zxyzlist( {ZxyzMatrix} ); 
+    >> matpsi.potential_Zxyz(ZxyzMatrix); 
     ```
 
-7. dipole: Dipole integrals. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__ 
+6. dipole: Dipole integrals. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__ 
 
     ```
     >> [x y z] = matpsi.dipole(); 
@@ -141,10 +135,8 @@ charge magnitude; xi, yi, zi are Cartesian coordinates of point charges. Use for
 1. tei_ijkl: 4-indexed two-electron interaction integral. Need four indices as input arguments. Return only one integral value. 
 
     ```
-    >> matpsi.tei_ijkl( {i, j, k, l} ); 
+    >> matpsi.tei_ijkl(i, j, k, l); 
     ```
-
-    Notice that all indices are in a cell array. 
 
 2. tei_uniqN: Total number of unique two-electron interaction integrals. No geometrical symmetry is considered. 
 
@@ -179,28 +171,22 @@ a really huge amount of memory.
 Direct algorithm. No geometrical symmetry is considered. 
 
     ```
-    >> matpsi.OccMO2J( { OccMO } ); 
+    >> matpsi.OccMO2J(OccMO); 
     ```
-    
-    Notice that OccMO is in a cell array and must have nbasis number of rows. 
 
 2. OccMO2K: For restricted Hartree Fock theory, form the 2-electron exchange interaction K matrix from occupied molecular orbital coefficients matrix. 
 Direct algorithm. No geometrical symmetry is considered. 
 
     ```
-    >> matpsi.OccMO2K( { OccMO } ); 
+    >> matpsi.OccMO2K(OccMO); 
     ```
-    
-    Notice that OccMO is in a cell array and must have nbasis number of rows. 
 
 3. OccMO2G: For restricted Hartree Fock theory, form the 2-electron G = 2 * J - K matrix from occupied molecular orbital coefficients matrix. 
 Direct algorithm. No geometrical symmetry is considered. 
 
     ```
-    >> matpsi.OccMO2G( { OccMO } ); 
+    >> matpsi.OccMO2G(OccMO); 
     ```
-    
-    Notice that OccMO is in a cell array and must have nbasis number of rows. 
 
 4. RHF: Solve restricted Hartree-Fock functions and returns the final Hartree-Fock energy 
 

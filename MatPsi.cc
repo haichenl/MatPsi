@@ -174,20 +174,7 @@ boost::shared_array<SharedMatrix> MatPsi::potential_sep() {
     return viMatArray;
 }
 
-SharedMatrix MatPsi::potential_zxyz(const double* Zxyz_array) {
-    boost::shared_ptr<OneBodyAOInt> viOBI(intfac_->ao_potential());
-    boost::shared_ptr<PotentialInt> viPtI = boost::static_pointer_cast<PotentialInt>(viOBI);
-    SharedMatrix Zxyz_row(new Matrix(1, 4));
-    for(int i = 0; i < 4; i++)
-        Zxyz_row->set(0, i, Zxyz_array[i]);
-    viPtI->set_charge_field(Zxyz_row);
-    SharedMatrix vZxyzMat(matfac_->create_matrix("Potential_Zxyz"));
-    viOBI->compute(vZxyzMat);
-    vZxyzMat->hermitivitize();
-    return vZxyzMat;
-}
-
-SharedMatrix MatPsi::potential_zxyzlist(SharedMatrix Zxyz_list) {
+SharedMatrix MatPsi::potential_Zxyz(SharedMatrix Zxyz_list) {
     boost::shared_ptr<OneBodyAOInt> viOBI(intfac_->ao_potential());
     boost::shared_ptr<PotentialInt> viPtI = boost::static_pointer_cast<PotentialInt>(viOBI);
     viPtI->set_charge_field(Zxyz_list);
