@@ -143,6 +143,11 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('RHF', this.objectHandle, varargin{:});
         end
         
+        % RHFenv, 1 double 
+        function varargout = RHFenv(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('RHFenv', this.objectHandle, varargin{:});
+        end
+        
         % RHF_finalize, nothing  
         function varargout = RHF_finalize(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('RHF_finalize', this.objectHandle, varargin{:});

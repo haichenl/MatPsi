@@ -30,19 +30,6 @@ void OutputMatrix(mxArray*& Mat_m, SharedMatrix Mat_c) {
             *Mat_m_pt++ = Mat_c_pt[j][i];
 }
 
-void OutputSymmMatrix(mxArray*& Mat_m, SharedMatrix Mat_c) {
-	int nrow = Mat_c->nrow();
-	int ncol = Mat_c->ncol();
-    if (nrow != ncol)
-        mexErrMsgTxt("OutputSymmMatrix: Matrix column/row dimensions do not agree. This function can only be used for symmetric matrices.");
-	Mat_m = mxCreateDoubleMatrix( nrow, ncol, mxREAL);
-	double* Mat_m_pt = mxGetPr(Mat_m);
-	double* Mat_c_pt = Mat_c->get_pointer();
-	for(int i = 0; i < nrow * ncol; i++) {
-		*Mat_m_pt++ = *Mat_c_pt++;
-	}
-}
-
 void OutputVector(mxArray*& Mat_m, SharedVector Vec_c) {
 	int dim = Vec_c->dim();
 	Mat_m = mxCreateDoubleMatrix( 1, dim, mxREAL);
@@ -74,8 +61,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("Constructor: MatPsi(mol_string, basis_name) input expected.");
         try {
             // Return a handle to a new C++ instance
-            //std::string mol_string = mxArrayToString(tmp);
-            //std::string basis_name = mxArrayToString(tmp);
             plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi((std::string)mxArrayToString(prhs[1]) , (std::string)mxArrayToString(prhs[2])));
         } 
         catch(...) {
@@ -219,7 +204,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("overlap: Unexpected arguments.");
         // Call the method
-		OutputSymmMatrix(plhs[0], MatPsi_obj->overlap());
+		OutputMatrix(plhs[0], MatPsi_obj->overlap());
         return;
     }
     
@@ -229,7 +214,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("kinetic: Unexpected arguments.");
         // Call the method
-		OutputSymmMatrix(plhs[0], MatPsi_obj->kinetic());
+		OutputMatrix(plhs[0], MatPsi_obj->kinetic());
         return;
     }
     
@@ -239,7 +224,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("potential: Unexpected arguments.");
         // Call the method
-		OutputSymmMatrix(plhs[0], MatPsi_obj->potential());
+		OutputMatrix(plhs[0], MatPsi_obj->potential());
         return;
     }
     
@@ -271,12 +256,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("potential_Zxyz: Unexpected arguments.");
         if (nrhs!=3)
-            mexErrMsgTxt("potential_Zxyz: potential_Zxyz(Zxyz_mat) input expected.");
+            mexErrMsgTxt("potential_Zxyz(Zxyz_mat): (number of point charges) by 4 matrix input expected.");
         if (mxGetN(prhs[2]) != 4)
             mexErrMsgTxt("potential_Zxyz: Zxyz list matrix dimension does not agree.");
         // Call the method
-        //mxArray* tmp = prhs[2];
-		OutputSymmMatrix(plhs[0], MatPsi_obj->potential_Zxyz(InputMatrix(prhs[2])));
+		OutputMatrix(plhs[0], MatPsi_obj->potential_Zxyz(InputMatrix(prhs[2])));
         return;
     }
     
@@ -287,9 +271,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("dipole: Unexpected arguments.");
         // Call the method
         std::vector<SharedMatrix> dipole = MatPsi_obj->dipole();
-		OutputSymmMatrix(plhs[0], dipole[0]);
-        OutputSymmMatrix(plhs[1], dipole[1]);
-        OutputSymmMatrix(plhs[2], dipole[2]);
+		OutputMatrix(plhs[0], dipole[0]);
+        OutputMatrix(plhs[1], dipole[1]);
+        OutputMatrix(plhs[2], dipole[2]);
         return;
     }
     
@@ -300,7 +284,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("tei_ijkl: Unexpected arguments.");
         if (nrhs!=6 || !mxIsDouble(prhs[2]) || !mxIsDouble(prhs[3]) || !mxIsDouble(prhs[4]) || !mxIsDouble(prhs[5]))
-            mexErrMsgTxt("tei_ijkl: tei_ijkl(i, j, k, l) input expected.");
+            mexErrMsgTxt("tei_ijkl(i, j, k, l): 4 integers input expected.");
         // Call the method
         int ind[4];
         for(int i = 0; i < 4; i++) {
@@ -368,9 +352,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("OccMO2J: Unexpected arguments.");
         if (nrhs!=3 || mxGetM(prhs[2]) != MatPsi_obj->nbasis())
-            mexErrMsgTxt("OccMO2J: nbasis by noccupy matrix OccMO2J(MOmat) input expected.");
+            mexErrMsgTxt("OccMO2J(MOmat): nbasis by noccupy matrix input expected.");
         // Call the method
-		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2J(InputMatrix(prhs[2])));
+		OutputMatrix(plhs[0], MatPsi_obj->OccMO2J(InputMatrix(prhs[2])));
         return;
     }
     
@@ -380,9 +364,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("OccMO2K: Unexpected arguments.");
         if (nrhs!=3 || mxGetM(prhs[2]) != MatPsi_obj->nbasis())
-            mexErrMsgTxt("OccMO2K: nbasis by noccupy matrix OccMO2K(MOmat) input expected.");
+            mexErrMsgTxt("OccMO2K(MOmat): nbasis by noccupy matrix input expected.");
         // Call the method
-		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2K(InputMatrix(prhs[2])));
+		OutputMatrix(plhs[0], MatPsi_obj->OccMO2K(InputMatrix(prhs[2])));
         return;
     }
     
@@ -392,9 +376,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("OccMO2G: Unexpected arguments.");
         if (nrhs!=3 || mxGetM(prhs[2]) != MatPsi_obj->nbasis())
-            mexErrMsgTxt("OccMO2G: nbasis by noccupy matrix OccMO2G(MOmat) input expected.");
+            mexErrMsgTxt("OccMO2G(MOmat): nbasis by noccupy matrix input expected.");
         // Call the method
-		OutputSymmMatrix(plhs[0], MatPsi_obj->OccMO2G(InputMatrix(prhs[2])));
+		OutputMatrix(plhs[0], MatPsi_obj->OccMO2G(InputMatrix(prhs[2])));
         return;
     }
     
@@ -405,6 +389,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("RHF: Unexpected arguments.");
         // Call the method
         OutputScalar(plhs[0], MatPsi_obj->RHF());
+        return;
+    }
+    
+    // RHFenv
+    if (!strcmp("RHFenv", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("RHFenv: Unexpected arguments.");
+        if (nrhs!=3)
+            mexErrMsgTxt("RHFenv(EnvMat): nbasis by nbasis matrix input expected.");
+        SharedMatrix EnvMat = InputMatrix(prhs[2]);
+        if(EnvMat->nirrep() != 1 || EnvMat->nrow() != MatPsi_obj->nbasis() || EnvMat->ncol() != MatPsi_obj->nbasis())
+            mexErrMsgTxt("RHFenv: Environment potential energy matrix dimensions do not agree.");
+        // Call the method
+        OutputScalar(plhs[0], MatPsi_obj->RHF(EnvMat));
         return;
     }
     
@@ -454,7 +453,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("RHF_density: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_D());
+        OutputMatrix(plhs[0], MatPsi_obj->RHF_D());
         return;
     }
     
@@ -464,7 +463,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("RHF_H: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_H());
+        OutputMatrix(plhs[0], MatPsi_obj->RHF_H());
         return;
     }
     
@@ -474,7 +473,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("RHF_J: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_J());
+        OutputMatrix(plhs[0], MatPsi_obj->RHF_J());
         return;
     }
     
@@ -484,7 +483,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("RHF_K: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_K());
+        OutputMatrix(plhs[0], MatPsi_obj->RHF_K());
         return;
     }
     
@@ -494,7 +493,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (nlhs < 0 || nrhs < 2)
             mexErrMsgTxt("RHF_F: Unexpected arguments.");
         // Call the method
-        OutputSymmMatrix(plhs[0], MatPsi_obj->RHF_F());
+        OutputMatrix(plhs[0], MatPsi_obj->RHF_F());
         return;
     }
     

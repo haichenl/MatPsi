@@ -194,55 +194,62 @@ Direct algorithm. No geometrical symmetry is considered.
     >> matpsi.RHF(); 
     ```
 
-5. RHF_finalize: Free some memory and disk space required by ```RHF()```. Right now executed automatically thus no need to call. 
+5. RHFenv: Solve restricted Hartree-Fock functions with a given environment potential energy matrix EnvMat and returns the final Hartree-Fock energy. 
+EnvMat must be an nbasis by nbasis Hermitian(symmetric) matrix. 
+
+    ```
+    >> matpsi.RHFenv(EnvMat); 
+    ```
+
+6. RHF_finalize: Free some memory and disk space required by ```RHF()```. Right now executed automatically thus no need to call. 
 
     ```
     >> matpsi.RHF_finalize(); 
     ```
 
-6. RHF_EHF: Get the final restricted Hartree-Fock energy. Executable after RHF. 
+7. RHF_EHF: Get the final restricted Hartree-Fock energy. Executable after RHF. 
 
     ```
     >> matpsi.RHF_EHF(); 
     ```
 
-7. RHF_C: Restricted Hartree-Fock molecular orbital coefficients. Executable after RHF. 
+8. RHF_C: Restricted Hartree-Fock molecular orbital coefficients. Executable after RHF. 
 
     ```
     >> matpsi.RHF_C(); 
     ```
 
-8. RHF_EMO: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after RHF. 
+9. RHF_EMO: Restricted Hartree-Fock molecular orbital energies (eigenvalues). Executable after RHF. 
 
     ```
     >> matpsi.RHF_EMO(); 
     ```
 
-9. RHF_D: Restricted Hartree-Fock density matrix. Executable after RHF. 
+10. RHF_D: Restricted Hartree-Fock density matrix. Executable after RHF. 
 
     ```
     >> matpsi.RHF_D(); 
     ```
 
-10. RHF_H: One-electron (core) Hamiltonian matrix. Executable after RHF. 
+11. RHF_H: One-electron (core) Hamiltonian matrix. Executable after RHF. 
 
     ```
     >> matpsi.RHF_H(); 
     ```
 
-11. RHF_J: 2-electron Coulomb interaction J matrix. Executable after RHF. 
+12. RHF_J: 2-electron Coulomb interaction J matrix. Executable after RHF. 
 
     ```
     >> matpsi.RHF_J(); 
     ```
 
-12. RHF_K: 2-electron exchange interaction K matrix. Executable after RHF. 
+13. RHF_K: 2-electron exchange interaction K matrix. Executable after RHF. 
 
     ```
     >> matpsi.RHF_K(); 
     ```
 
-13. RHF_F: Fock matrix. Executable after RHF. 
+14. RHF_F: Fock matrix. Executable after RHF. 
 
     ```
     >> matpsi.RHF_F(); 

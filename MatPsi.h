@@ -133,6 +133,9 @@ public:
     // restricted Hartree-Fock; quick but uses our filesystem and causes a lot of risky issues 
     double RHF();
     
+    // restricted Hartree-Fock with environment potential; quick but uses our filesystem and causes a lot of risky issues 
+    double RHF(SharedMatrix EnvMat);
+    
     // release memory and clean temporary files for Hartree-Fock 
     void RHF_finalize();
     

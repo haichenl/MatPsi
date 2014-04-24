@@ -337,6 +337,19 @@ double MatPsi::RHF() {
     return Ehf;
 }
 
+double MatPsi::RHF(SharedMatrix EnvMat) {
+    PSIO::shared_object()->set_pid(fakepid_); // have to set pid again as some other instances are gonna change it, 
+                                              // and the JK object just stupidly uses the global psio object... 
+    boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
+    molecule_->set_point_group(c1group); // for safety 
+    Process::environment.set_molecule(molecule_);
+    rhf_ = boost::shared_ptr<scf::myRHF>(new scf::myRHF(options_, psio_));
+    Process::environment.set_wavefunction(rhf_);
+    double Ehf = rhf_->compute_energy(EnvMat);
+    RHF_finalize();
+    return Ehf;
+}
+
 void MatPsi::RHF_finalize() {
     PSIO::shared_object()->set_pid(fakepid_);
     rhf_->finalize();
