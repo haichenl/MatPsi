@@ -133,13 +133,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
-    // coord(natom, 3)
-    if (!strcmp("coord", cmd)) {
+    // geom(natom, 3)
+    if (!strcmp("geom", cmd)) {
         // Check parameters
         if (nlhs < 0 || nrhs < 2)
-            mexErrMsgTxt("coord: Unexpected arguments.");
+            mexErrMsgTxt("geom: Unexpected arguments.");
         // Call the method
-        OutputMatrix(plhs[0], MatPsi_obj->coord());
+        OutputMatrix(plhs[0], MatPsi_obj->geom());
+        return;
+    }
+    
+    // set_geom(natom, 3)
+    if (!strcmp("set_geom", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("set_geom: Unexpected arguments.");
+        if (nrhs!=3)
+            mexErrMsgTxt("set_geom(newGeom): natom by 3 matrix input expected.");
+        if (mxGetM(prhs[2]) != MatPsi_obj->natom() || mxGetN(prhs[2]) != 3)
+            mexErrMsgTxt("set_geom: Input geometry matrix dimension does not agree.");
+        // Call the method
+		MatPsi_obj->set_geom(InputMatrix(prhs[2]));
         return;
     }
     

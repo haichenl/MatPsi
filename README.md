@@ -59,13 +59,19 @@ Construct from an existing MatPsi object.
     >> matpsi.nelec(); 
     ```
 
-3. coord: Atom Cartesian coordinates. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__  
+3. geom: Geometry or Cartesian coordinates of all atoms. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__  
 
     ```
-    >> matpsi.coord(); 
+    >> matpsi.geom(); 
     ```
 
-4. Enuc:  Nuclear repulsion energy. 
+4. set_geom: Set geometry. Requires an natom by 3 matrix as input. __Unit is a.u. (i.e. Bohr radius) rather than Angstrom!__  
+
+    ```
+    >> matpsi.set_geom(newGeom); 
+    ```
+
+5. Enuc:  Nuclear repulsion energy. 
 
     ```
     >> matpsi.Enuc(); 

@@ -43,7 +43,10 @@ protected:
     // common initializer for constructors 
     void common_init(std::string mol_string, std::string basis_name, int ncores = 4, unsigned long int memory = 1000000000L);
     
-    /// initialize the directjk object 
+    // create basis object and one & two electron integral factories 
+    void create_basis_and_integral_factories();
+    
+    // initialize the directjk object 
     void init_directjk(SharedMatrix OccMO, double cutoff = 1.0E-12);
     
 public:
@@ -63,8 +66,11 @@ public:
     // number of atoms 
     int natom() { return molecule_->natom(); }
     
-    // atom coordinates 
-    SharedMatrix coord() { return molecule_->geometry().clone(); }
+    // geometry 
+    SharedMatrix geom() { return molecule_->geometry().clone(); }
+    
+    // set geometry 
+    void set_geom(SharedMatrix newGeom);
     
     // nuclear repulsion energy 
     double Enuc() { return molecule_->nuclear_repulsion_energy(); }

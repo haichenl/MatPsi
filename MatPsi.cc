@@ -48,24 +48,12 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     molecule_->set_basis_all_atoms(basisname);
     Process::environment.set_molecule(molecule_);
     
-    
     // set cores and memory 
     Process::environment.set_n_threads(ncores); // these values are shared among all instances, so better be constants 
     Process::environment.set_memory(memory);
     
-    // create basis object 
-    boost::shared_ptr<BasisSetParser> parser(new Gaussian94BasisSetParser());
-    //parser->force_puream_or_cartesian_ = true;
-    //parser->forced_is_puream_ = true;
-    basis_ = BasisSet::construct(parser, molecule_, "BASIS");
-    boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
-    molecule_->set_point_group(c1group); // creating basis set object change molecule's point group, for some reasons 
-    
-    // create integral factory object 
-    intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
-    
-    // create two electron integral generator
-    eri_ = boost::shared_ptr<TwoBodyAOInt>(intfac_->eri());
+    // create basis object and one & two electron integral factories 
+    create_basis_and_integral_factories();
     
     // create matrix factory object 
     int nbf[] = { basis_->nbf() };
@@ -77,10 +65,50 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     
 }
 
+void MatPsi::create_basis_and_integral_factories() {
+    // create basis object 
+    boost::shared_ptr<BasisSetParser> parser(new Gaussian94BasisSetParser());
+    //parser->force_puream_or_cartesian_ = true;
+    //parser->forced_is_puream_ = true;
+    basis_ = BasisSet::construct(parser, molecule_, "BASIS");  
+    boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
+    molecule_->set_point_group(c1group); // creating basis set object change molecule's point group, for some reasons 
+    
+    // create integral factory object 
+    intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
+    
+    // create two electron integral generator
+    eri_ = boost::shared_ptr<TwoBodyAOInt>(intfac_->eri());
+}
+
 // destructor 
 MatPsi::~MatPsi() {
     if(rhf_ != NULL)
         RHF_finalize();
+}
+
+void MatPsi::set_geom(SharedMatrix newGeom) {
+    // store the old geometry
+    Matrix oldgeom = molecule_->geometry();
+    molecule_->set_geometry( *(newGeom.get()) );
+    
+    // determine whether the new geometry will cause problems (typically 2 atoms are at the same point) 
+    Matrix distmat = molecule_->distance_matrix();
+    bool nonbreak = true;
+    for(int i = 0; i < natom() && nonbreak; i++) {
+        for(int j = 0; j < i - 1; j++) {
+            if(distmat.get(i, j) == 0) {
+                molecule_->set_geometry(oldgeom);
+                cout<<"set_geom: Geometry is too crazy; keeping the old one."<<endl;
+                nonbreak = false;
+                break;
+            }
+        }
+    }
+    
+    // update other objects 
+    if(nonbreak)
+    create_basis_and_integral_factories();
 }
 
 SharedVector MatPsi::Zlist() {

@@ -34,9 +34,14 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('nelec', this.objectHandle, varargin{:});
         end
         
-        % coord, (natom, 3) matrix 
-        function varargout = coord(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('coord', this.objectHandle, varargin{:});
+        % geom, (natom, 3) matrix 
+        function varargout = geom(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('geom', this.objectHandle, varargin{:});
+        end
+        
+        % set_geom, (natom, 3) matrix 
+        function varargout = set_geom(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('set_geom', this.objectHandle, varargin{:});
         end
         
         % Zlist, (natom, 1) matrix 
