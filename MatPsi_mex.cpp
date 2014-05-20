@@ -87,20 +87,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     MatPsi* MatPsi_obj = convertMat2Ptr<MatPsi>(prhs[1]);
     
     // Call the various class methods 
-	// Copy Constructor
-	if (!strcmp("MatPsiCopy", cmd)) {
-        // Check parameters
-        if (nlhs != 1)
-            mexErrMsgTxt("Copy Constructor: One output expected.");
-        try {
-            // Return a handle to a new C++ instance
-            plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi(MatPsi_obj));
-        } 
-        catch(...) {
-            mexErrMsgTxt("Copy Constructor failed");
-        }
-        return;
-    }
     
     // testmol
     if (!strcmp("testmol", cmd)) {
@@ -113,6 +99,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
 	
     // Molecule properties
+    // molecule_string 
+    if (!strcmp("molecule_string", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("molecule_string: Unexpected arguments.");
+        // Call the method
+        plhs[0] = mxCreateString((MatPsi_obj->molecule_string()).c_str());
+        return;
+    }
+    
+    // basis_name  
+    if (!strcmp("basis_name", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("basis_name: Unexpected arguments.");
+        // Call the method
+        plhs[0] = mxCreateString((MatPsi_obj->basis_name()).c_str());
+        return;
+    }
+    
     // natom
     if (!strcmp("natom", cmd)) {
         // Check parameters

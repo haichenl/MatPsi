@@ -5,11 +5,6 @@ MatPsi::MatPsi(std::string molstring, std::string basisname) {
     common_init(molstring, basisname);
 }
 
-// copy constructor 
-MatPsi::MatPsi(MatPsi* inputMatPsi) {
-    common_init(inputMatPsi->molstring_, inputMatPsi->basisname_);
-}
-
 std::string tempname() {
     // an ugly trick to get a temp file name.. subject to change 
     char* trickbuffer = tempnam("/tmp/", "tmp");

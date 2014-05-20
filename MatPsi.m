@@ -10,8 +10,8 @@ classdef MatPsi < handle
         end
 		
 		%% Copy Constructor 
-		function this = MatPsiCopy(this, varargin)
-            this.objectHandle = MatPsi_mex('MatPsiCopy', this.objectHandle, varargin{:});
+		function this2 = MatPsiCopy(this, varargin)
+            this2 = MatPsi(this.molecule_string(), this.basis_name());
         end
         
         %% Destructor - Destroy the C++ class instance 
@@ -24,6 +24,16 @@ classdef MatPsi < handle
         end
         
         %% Molecule properties 
+        % molecule_string, 1 string 
+        function varargout = molecule_string(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('molecule_string', this.objectHandle, varargin{:});
+        end
+        
+        % basis_name, 1 string 
+        function varargout = basis_name(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('basis_name', this.objectHandle, varargin{:});
+        end
+        
         % natom, 1 double 
         function varargout = natom(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('natom', this.objectHandle, varargin{:});

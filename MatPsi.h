@@ -53,9 +53,6 @@ public:
     // constructor; takes in 2 strings and parse them 
     MatPsi(std::string mol_string, std::string basis_name);
 	
-    // copy constructor 
-	MatPsi(MatPsi* inputMatPsi);
-	
     // destructor 
 	~MatPsi();
     
@@ -63,6 +60,12 @@ public:
     void testmol() {Process::environment.molecule()->print();}
     
     // Molecule properties 
+    // the string describing the molecule 
+    std::string molecule_string() { return molstring_; }
+    
+    // basis set name string 
+    std::string basis_name() { return basisname_; }
+    
     // number of atoms 
     int natom() { return molecule_->natom(); }
     
