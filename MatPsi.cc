@@ -73,6 +73,9 @@ void MatPsi::create_basis_and_integral_factories() {
     basis_ = BasisSet::construct(parser, molecule_, "BASIS");  
     boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
     molecule_->set_point_group(c1group); // creating basis set object change molecule's point group, for some reasons 
+    //molecule_->set_orientation_fixed();
+    //molecule_->set_com_fixed();
+    //molecule_->set_reinterpret_coordentry(false);
     
     // create integral factory object 
     intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
