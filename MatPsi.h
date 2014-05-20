@@ -59,13 +59,13 @@ public:
     // global molecule is shared among all instances, this method is for debugging 
     void testmol() {Process::environment.molecule()->print();}
     
-    // Molecule properties 
     // the string describing the molecule 
     std::string molecule_string() { return molstring_; }
     
     // basis set name string 
     std::string basis_name() { return basisname_; }
     
+    // Molecule properties 
     // number of atoms 
     int natom() { return molecule_->natom(); }
     

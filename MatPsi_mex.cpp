@@ -98,7 +98,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
 	
-    // Molecule properties
     // molecule_string 
     if (!strcmp("molecule_string", cmd)) {
         // Check parameters
@@ -119,6 +118,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // Molecule properties
     // natom
     if (!strcmp("natom", cmd)) {
         // Check parameters

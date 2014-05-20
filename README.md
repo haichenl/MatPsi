@@ -45,8 +45,20 @@ Construct from an existing MatPsi object.
 
     >> matpsi2 = matpsi.MatPsiCopy();
 
-####Molecule properties 
+####Constructor related properties
+1. molecule_string: Output the string used in constructing the MatPsi object. 
 
+    ```
+    >> matpsi.molecule_string(); 
+    ```
+
+2. basis_name: Output the basis set name used in constructing the MatPsi object. 
+
+    ```
+    >> matpsi.basis_name(); 
+    ```
+
+####Molecule properties 
 1. natom: Number of atoms. 
 
     ```

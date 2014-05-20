@@ -23,7 +23,6 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('testmol', this.objectHandle, varargin{:});
         end
         
-        %% Molecule properties 
         % molecule_string, 1 string 
         function varargout = molecule_string(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('molecule_string', this.objectHandle, varargin{:});
@@ -34,6 +33,7 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('basis_name', this.objectHandle, varargin{:});
         end
         
+        %% Molecule properties 
         % natom, 1 double 
         function varargout = natom(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('natom', this.objectHandle, varargin{:});
