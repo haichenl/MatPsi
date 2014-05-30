@@ -57,6 +57,18 @@ Construct from an existing MatPsi object.
     ```
     >> matpsi.basis_name(); 
     ```
+####Molecule operations 
+1. fix_mol: Fix the molecule at its current frame, i.e. disable re-orientation, moving to center-of-mass, etc. 
+
+    ```
+    >> matpsi.fix_mol(); 
+    ```
+
+2. free_mol: Free the molecule, i.e. re-enable re-orientation, moving to center-of-mass, etc. 
+
+    ```
+    >> matpsi.free_mol(); 
+    ```
 
 ####Molecule properties 
 1. natom: Number of atoms. 

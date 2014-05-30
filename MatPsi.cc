@@ -1,16 +1,17 @@
 // Please directly include this file in MatPsi_mex.cpp to make compilation easier... 
 
-// Constructor
-MatPsi::MatPsi(std::string molstring, std::string basisname) {
-    common_init(molstring, basisname);
-}
-
 std::string tempname() {
     // an ugly trick to get a temp file name.. subject to change 
     char* trickbuffer = tempnam("/tmp/", "tmp");
     std::string tempname_ = std::string(trickbuffer + 5); 
     delete trickbuffer;
     return tempname_;
+}
+
+// Constructor
+MatPsi::MatPsi(std::string molstring, std::string basisname) {
+    fakepid_ = tempname();
+    common_init(molstring, basisname);
 }
 
 void MatPsi::common_init(std::string molstring, std::string basisname, int ncores, unsigned long int memory) {
@@ -20,15 +21,12 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     Process::environment.options.set_read_globals(true);
     read_options("", Process::environment.options, true);
     Process::environment.options.set_read_globals(false);
-    Process::environment.options.set_global_int("MAXITER", 40);
+    Process::environment.options.set_global_int("MAXITER", 100);
     
     options_ = Process::environment.options;
     options_.set_current_module("MatPsi");
     
     Wavefunction::initialize_singletons();
-    
-    // an ugly trick to get a temp file name.. subject to change 
-    fakepid_ = tempname();
     
     // initialize psio 
     psio_init();
@@ -48,35 +46,33 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     Process::environment.set_memory(memory);
     
     // create basis object and one & two electron integral factories 
-    create_basis_and_integral_factories();
+    create_basis();
+    create_integral_factories_and_directjk();
     
     // create matrix factory object 
     int nbf[] = { basis_->nbf() };
     matfac_ = boost::shared_ptr<MatrixFactory>(new MatrixFactory);
     matfac_->init_with(1, nbf, nbf);
-    
-    // create directJK object
-    directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
-    
+      
 }
 
-void MatPsi::create_basis_and_integral_factories() {
+void MatPsi::create_basis() {
     // create basis object 
     boost::shared_ptr<BasisSetParser> parser(new Gaussian94BasisSetParser());
-    //parser->force_puream_or_cartesian_ = true;
-    //parser->forced_is_puream_ = true;
     basis_ = BasisSet::construct(parser, molecule_, "BASIS");  
     boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
     molecule_->set_point_group(c1group); // creating basis set object change molecule's point group, for some reasons 
-    //molecule_->set_orientation_fixed();
-    //molecule_->set_com_fixed();
-    //molecule_->set_reinterpret_coordentry(false);
-    
+}
+
+void MatPsi::create_integral_factories_and_directjk() {
     // create integral factory object 
     intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
     
     // create two electron integral generator
     eri_ = boost::shared_ptr<TwoBodyAOInt>(intfac_->eri());
+    
+    // create directJK object
+    directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
 }
 
 // destructor 
@@ -85,12 +81,29 @@ MatPsi::~MatPsi() {
         RHF_finalize();
 }
 
+void MatPsi::fix_mol() {
+    molecule_->set_orientation_fixed();
+    molecule_->set_com_fixed();
+    molecule_->set_reinterpret_coordentry(false);
+}
+
+void MatPsi::free_mol() {
+    // done by re-generating a new molecule object (and basis object etc.) while retaining the geometry 
+    SharedMatrix oldgeom = geom();
+    molecule_ = psi::Molecule::create_molecule_from_string(molstring_);
+    molecule_->set_basis_all_atoms(basisname_);
+    Process::environment.set_molecule(molecule_);
+    create_basis(); // the molecule object isn't complete before we create the basis object, according to psi4 documentation 
+    molecule_->set_geometry(*(oldgeom.get()));
+    create_basis();
+}
+
 void MatPsi::set_geom(SharedMatrix newGeom) {
     // store the old geometry
     Matrix oldgeom = molecule_->geometry();
-    molecule_->set_geometry( *(newGeom.get()) );
+    molecule_->set_geometry(*(newGeom.get()));
     
-    // determine whether the new geometry will cause problems (typically 2 atoms are at the same point) 
+    // determine whether the new geometry will cause a problem (typically 2 atoms are at the same point) 
     Matrix distmat = molecule_->distance_matrix();
     bool nonbreak = true;
     for(int i = 0; i < natom() && nonbreak; i++) {
@@ -105,8 +118,10 @@ void MatPsi::set_geom(SharedMatrix newGeom) {
     }
     
     // update other objects 
-    if(nonbreak)
-    create_basis_and_integral_factories();
+    if(nonbreak) {
+        create_basis();
+        rhf_.reset();
+    }
 }
 
 SharedVector MatPsi::Zlist() {
@@ -359,6 +374,7 @@ double MatPsi::RHF() {
     rhf_ = boost::shared_ptr<scf::myRHF>(new scf::myRHF(options_, psio_));
     Process::environment.set_wavefunction(rhf_);
     double Ehf = rhf_->compute_energy();
+    rhf_->J()->scale(0.5);
     RHF_finalize();
     return Ehf;
 }
@@ -372,6 +388,7 @@ double MatPsi::RHF(SharedMatrix EnvMat) {
     rhf_ = boost::shared_ptr<scf::myRHF>(new scf::myRHF(options_, psio_));
     Process::environment.set_wavefunction(rhf_);
     double Ehf = rhf_->compute_energy(EnvMat);
+    rhf_->J()->scale(0.5);
     RHF_finalize();
     return Ehf;
 }

@@ -23,6 +23,16 @@ classdef MatPsi < handle
             [varargout{1:nargout}] = MatPsi_mex('testmol', this.objectHandle, varargin{:});
         end
         
+        % fix_mol 
+        function varargout = fix_mol(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('fix_mol', this.objectHandle, varargin{:});
+        end
+        
+        % free_mol 
+        function varargout = free_mol(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('free_mol', this.objectHandle, varargin{:});
+        end
+        
         % molecule_string, 1 string 
         function varargout = molecule_string(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('molecule_string', this.objectHandle, varargin{:});

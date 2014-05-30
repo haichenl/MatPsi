@@ -43,8 +43,11 @@ protected:
     // common initializer for constructors 
     void common_init(std::string mol_string, std::string basis_name, int ncores = 4, unsigned long int memory = 1000000000L);
     
-    // create basis object and one & two electron integral factories 
-    void create_basis_and_integral_factories();
+    // create basis object 
+    void create_basis();
+    
+    // create one & two electron integral factories and directjk object 
+    void create_integral_factories_and_directjk();
     
     // initialize the directjk object 
     void init_directjk(SharedMatrix OccMO, double cutoff = 1.0E-12);
@@ -64,6 +67,13 @@ public:
     
     // basis set name string 
     std::string basis_name() { return basisname_; }
+    
+    // Molecule operations 
+    // fix the molecule
+    void fix_mol();
+    
+    // free the molecule
+    void free_mol();
     
     // Molecule properties 
     // number of atoms 

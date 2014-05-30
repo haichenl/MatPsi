@@ -118,6 +118,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         return;
     }
     
+    // Molecule operations 
+    // fix_mol
+    if (!strcmp("fix_mol", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("fix_mol: Unexpected arguments.");
+        // Call the method
+        MatPsi_obj->fix_mol();
+        return;
+    }
+    
+    // free_mol
+    if (!strcmp("free_mol", cmd)) {
+        // Check parameters
+        if (nlhs < 0 || nrhs < 2)
+            mexErrMsgTxt("free_mol: Unexpected arguments.");
+        // Call the method
+        MatPsi_obj->free_mol();
+        return;
+    }
+    
     // Molecule properties
     // natom
     if (!strcmp("natom", cmd)) {
