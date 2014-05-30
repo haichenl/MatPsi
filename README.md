@@ -57,6 +57,7 @@ Construct from an existing MatPsi object.
     ```
     >> matpsi.basis_name(); 
     ```
+
 ####Molecule operations 
 1. fix_mol: Fix the molecule at its current frame, i.e. disable re-orientation, moving to center-of-mass, etc. 
 
