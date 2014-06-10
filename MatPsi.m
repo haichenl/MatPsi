@@ -3,7 +3,7 @@ classdef MatPsi < handle
     properties (SetAccess = private)
         path;
     end
-    properties (SetAccess = private, Hidden = true)
+    properties (SetAccess = private, Hidden = true, Transient = true)
         objectHandle; % Handle to the underlying C++ class instance
     end
     methods
@@ -25,15 +25,17 @@ classdef MatPsi < handle
             end
             this.objectHandle = MatPsi_mex('new', varargin{:}, this.path);
         end
-		
-		%% Copy Constructor 
-		function this2 = MatPsiCopy(this, varargin)
+        
+        %% Copy Constructor 
+        function this2 = MatPsiCopy(this, varargin)
             this2 = MatPsi(this.molecule_string(), this.basis_name());
         end
         
         %% Destructor - Destroy the C++ class instance 
         function delete(this)
-            MatPsi_mex('delete', this.objectHandle);
+            if(~isempty(this.objectHandle))
+                MatPsi_mex('delete', this.objectHandle);
+            end
         end
         
         %% Constructor related properties
