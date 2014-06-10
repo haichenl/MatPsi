@@ -29,6 +29,7 @@ protected:
     std::string fakepid_; // serves as a fake pid 
     boost::shared_ptr<PSIO> psio_;
     
+    std::string path_;
     std::string molstring_;
     std::string basisname_;
     
@@ -41,26 +42,29 @@ protected:
     boost::shared_ptr<scf::myRHF> rhf_;
     
     // common initializer for constructors 
-    void common_init(std::string mol_string, std::string basis_name, int ncores = 4, unsigned long int memory = 1000000000L);
+    void common_init(std::string molstring, std::string basisname, int ncores = 4, unsigned long int memory = 1000000000L);
     
     // create basis object 
     void create_basis();
     
     // create one & two electron integral factories and directjk object 
-    void create_integral_factories_and_directjk();
+    void create_integral_factories();
     
     // initialize the directjk object 
     void init_directjk(SharedMatrix OccMO, double cutoff = 1.0E-12);
     
 public:
     // constructor; takes in 2 strings and parse them 
-    MatPsi(std::string mol_string, std::string basis_name);
+    MatPsi(std::string molstring, std::string basisname, std::string path);
 	
     // destructor 
 	~MatPsi();
     
     // global molecule is shared among all instances, this method is for debugging 
     void testmol() {Process::environment.molecule()->print();}
+    
+    // enable DirectJK object 
+    void UseDirectJK();
     
     // the string describing the molecule 
     std::string molecule_string() { return molstring_; }

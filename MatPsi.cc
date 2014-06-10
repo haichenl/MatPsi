@@ -9,8 +9,9 @@ std::string tempname() {
 }
 
 // Constructor
-MatPsi::MatPsi(std::string molstring, std::string basisname) {
+MatPsi::MatPsi(std::string molstring, std::string basisname, std::string path) {
     fakepid_ = tempname();
+    path_ = path + "/share/";
     common_init(molstring, basisname);
 }
 
@@ -22,6 +23,7 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     read_options("", Process::environment.options, true);
     Process::environment.options.set_read_globals(false);
     Process::environment.options.set_global_int("MAXITER", 100);
+    Process::environment.set("PSIDATADIR", path_);
     
     options_ = Process::environment.options;
     options_.set_current_module("MatPsi");
@@ -47,7 +49,7 @@ void MatPsi::common_init(std::string molstring, std::string basisname, int ncore
     
     // create basis object and one & two electron integral factories 
     create_basis();
-    create_integral_factories_and_directjk();
+    create_integral_factories();
     
     // create matrix factory object 
     int nbf[] = { basis_->nbf() };
@@ -64,13 +66,15 @@ void MatPsi::create_basis() {
     molecule_->set_point_group(c1group); // creating basis set object change molecule's point group, for some reasons 
 }
 
-void MatPsi::create_integral_factories_and_directjk() {
+void MatPsi::create_integral_factories() {
     // create integral factory object 
     intfac_ = boost::shared_ptr<IntegralFactory>(new IntegralFactory(basis_, basis_, basis_, basis_));
     
     // create two electron integral generator
     eri_ = boost::shared_ptr<TwoBodyAOInt>(intfac_->eri());
-    
+}
+
+void MatPsi::UseDirectJK() {
     // create directJK object
     directjk_ = boost::shared_ptr<DirectJK>(new DirectJK(basis_));
 }
@@ -96,6 +100,7 @@ void MatPsi::free_mol() {
     create_basis(); // the molecule object isn't complete before we create the basis object, according to psi4 documentation 
     molecule_->set_geometry(*(oldgeom.get()));
     create_basis();
+    create_integral_factories();
 }
 
 void MatPsi::set_geom(SharedMatrix newGeom) {
@@ -120,6 +125,7 @@ void MatPsi::set_geom(SharedMatrix newGeom) {
     // update other objects 
     if(nonbreak) {
         create_basis();
+        create_integral_factories();
         rhf_.reset();
     }
 }
@@ -337,6 +343,9 @@ void MatPsi::init_directjk(SharedMatrix OccMO, double cutoff) {
 }
 
 SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
+    if(directjk_ == NULL) {
+        throw PSIEXCEPTION("OccMO2J: DirectJK object has not been enabled.");
+    }
     init_directjk(OccMO);
     directjk_->compute();
     SharedMatrix Jnew = directjk_->J()[0];
@@ -346,6 +355,9 @@ SharedMatrix MatPsi::OccMO2J(SharedMatrix OccMO) {
 }
 
 SharedMatrix MatPsi::OccMO2K(SharedMatrix OccMO) {
+    if(directjk_ == NULL) {
+        throw PSIEXCEPTION("OccMO2K: DirectJK object has not been enabled.");
+    }
     init_directjk(OccMO);
     directjk_->compute();
     SharedMatrix Knew = directjk_->K()[0];
@@ -355,6 +367,9 @@ SharedMatrix MatPsi::OccMO2K(SharedMatrix OccMO) {
 }
 
 SharedMatrix MatPsi::OccMO2G(SharedMatrix OccMO) {
+    if(directjk_ == NULL) {
+        throw PSIEXCEPTION("OccMO2G: DirectJK object has not been enabled.");
+    }
     init_directjk(OccMO);
     directjk_->compute();
     SharedMatrix Gnew = directjk_->J()[0];
@@ -366,8 +381,8 @@ SharedMatrix MatPsi::OccMO2G(SharedMatrix OccMO) {
 }
 
 double MatPsi::RHF() {
-    PSIO::shared_object()->set_pid(fakepid_); // have to set pid again as some other instances are gonna change it, 
-                                              // and the JK object just stupidly uses the global psio object... 
+    PSIO::shared_object()->set_pid(fakepid_); // have to set pid again as some other instances could have changed it, 
+                                              // and the JK object inside of rhf_ just stupidly uses the global psio object... 
     boost::shared_ptr<PointGroup> c1group(new PointGroup("C1"));
     molecule_->set_point_group(c1group); // for safety 
     Process::environment.set_molecule(molecule_);

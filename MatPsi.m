@@ -1,12 +1,29 @@
 % MatPsi: An interface between Matlab and Psi4 
 classdef MatPsi < handle
+    properties (SetAccess = private)
+        path;
+    end
     properties (SetAccess = private, Hidden = true)
         objectHandle; % Handle to the underlying C++ class instance
     end
     methods
         %% Constructor - Create a new C++ class instance  
         function this = MatPsi(varargin)
-            this.objectHandle = MatPsi_mex('new', varargin{:});
+            if(exist('./share/basis', 'file'))
+                this.path = pwd;
+            elseif(exist('./@MatPsi/share/basis', 'file'))
+                this.path = [pwd, '/@MatPsi'] ;
+            else
+                toppath = regexp(path(), '[^:]*', 'match', 'once');
+                if(exist([toppath, '/share/basis'], 'file'))
+                    this.path = toppath;
+                elseif(exist([toppath, '/@MatPsi/share/basis'], 'file'))
+                    this.path = [toppath, '/@MatPsi'];
+                else
+                    throw(MException('MatPsi:MatPsi','MatPsi cannot find basis set files.'));
+                end
+            end
+            this.objectHandle = MatPsi_mex('new', varargin{:}, this.path);
         end
 		
 		%% Copy Constructor 
@@ -18,21 +35,8 @@ classdef MatPsi < handle
         function delete(this)
             MatPsi_mex('delete', this.objectHandle);
         end
-
-        function varargout = testmol(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('testmol', this.objectHandle, varargin{:});
-        end
         
-        % fix_mol 
-        function varargout = fix_mol(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('fix_mol', this.objectHandle, varargin{:});
-        end
-        
-        % free_mol 
-        function varargout = free_mol(this, varargin)
-            [varargout{1:nargout}] = MatPsi_mex('free_mol', this.objectHandle, varargin{:});
-        end
-        
+        %% Constructor related properties
         % molecule_string, 1 string 
         function varargout = molecule_string(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('molecule_string', this.objectHandle, varargin{:});
@@ -41,6 +45,22 @@ classdef MatPsi < handle
         % basis_name, 1 string 
         function varargout = basis_name(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('basis_name', this.objectHandle, varargin{:});
+        end
+
+        % ignore this 
+        function varargout = testmol(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('testmol', this.objectHandle, varargin{:});
+        end
+        
+        %% Molecule operations 
+        % fix_mol 
+        function varargout = fix_mol(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('fix_mol', this.objectHandle, varargin{:});
+        end
+        
+        % free_mol 
+        function varargout = free_mol(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('free_mol', this.objectHandle, varargin{:});
         end
         
         %% Molecule properties 
@@ -148,6 +168,11 @@ classdef MatPsi < handle
         end
         
         %% SCF related 
+        % UseDirectJK 
+        function varargout = UseDirectJK(this, varargin)
+            [varargout{1:nargout}] = MatPsi_mex('UseDirectJK', this.objectHandle, varargin{:});
+        end
+        
         % OccMO2J, (nbasis, nbasis) matrix 
         function varargout = OccMO2J(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('OccMO2J', this.objectHandle, varargin{:});
