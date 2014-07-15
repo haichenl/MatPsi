@@ -23,10 +23,14 @@ classdef MatPsi < handle
                     throw(MException('MatPsi:MatPsi','MatPsi cannot find basis set files.'));
                 end
             end
-            this.objectHandle = MatPsi_mex('new', varargin{:}, this.path);
+            if(exist([this.path, '/share/basis/', lower(varargin{2}), '.gbs'], 'file'))
+                this.objectHandle = MatPsi_mex('new', varargin{:}, this.path);
+            else
+                throw(MException('MatPsi:MatPsi','Basis set name invalid.'));
+            end
         end
         
-        %% Copy Constructor 
+        %% Copy Constructor
         function this2 = MatPsiCopy(this, varargin)
             this2 = MatPsi(this.molecule_string(), this.basis_name());
         end
@@ -111,9 +115,9 @@ classdef MatPsi < handle
         function varargout = func2am(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('func2am', this.objectHandle, varargin{:});
         end
-		
+        
         %% One-electron integrals 
-		% overlap, (nbasis, nbasis) matrix 
+        % overlap, (nbasis, nbasis) matrix 
         function varargout = overlap(this, varargin)
             [varargout{1:nargout}] = MatPsi_mex('overlap', this.objectHandle, varargin{:});
         end
