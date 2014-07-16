@@ -59,13 +59,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("Constructor: One output expected.");
         if (nrhs!=4 || !mxIsChar(prhs[1]) || !mxIsChar(prhs[2]))
             mexErrMsgTxt("Constructor: MatPsi(mol_string, basis_name) input expected.");
-        try {
-            // Return a handle to a new C++ instance
-            plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi((std::string)mxArrayToString(prhs[1]) , (std::string)mxArrayToString(prhs[2]), (std::string)mxArrayToString(prhs[3])));
-        } 
-        catch(...) {
-            mexErrMsgTxt("Constructor failed. Sorry!!");
-        }
+		// Return a handle to a new C++ instance
+		plhs[0] = convertPtr2Mat<MatPsi>(new MatPsi((std::string)mxArrayToString(prhs[1]) , (std::string)mxArrayToString(prhs[2]), (std::string)mxArrayToString(prhs[3])));
         return;
     }
     

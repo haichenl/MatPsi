@@ -23,11 +23,7 @@ classdef MatPsi < handle
                     throw(MException('MatPsi:MatPsi','MatPsi cannot find basis set files.'));
                 end
             end
-            if(exist([this.path, '/share/basis/', lower(varargin{2}), '.gbs'], 'file'))
-                this.objectHandle = MatPsi_mex('new', varargin{:}, this.path);
-            else
-                throw(MException('MatPsi:MatPsi','Basis set name invalid.'));
-            end
+			this.objectHandle = MatPsi_mex('new', varargin{:}, this.path);
         end
         
         %% Copy Constructor
