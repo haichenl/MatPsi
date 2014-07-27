@@ -323,6 +323,8 @@ and in "$psi4dir/src/lib/libmins/twobody.cc", `TwoBodyAOInt` class virtual const
 the last line shown, `target_pybuffer_(&target_, true)`, is known causing some strange segmentation fault errors. 
 Eliminating this line fixes it, but as a result, we probably need to set `bool enable_pybuffer_` as `false` forever. 
 
+__(Jul. 27 added) Deleted all things related with `pybuffer` from "eribase.cc", "twobody.cc", "twobody.h", and "export_mints.cc".__
+
 Apr. 02: A new method, void remove_symmetry(), has been added to JK class. It allows us to get rid of the geometrical symmetry automatically 
 imposed (but not used in real computation for some weird reasons) by JK constructor. 
 
