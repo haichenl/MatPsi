@@ -389,10 +389,17 @@ double MatPsi::RHF() {
     Process::environment.set_molecule(molecule_);
     rhf_ = boost::shared_ptr<scf::myRHF>(new scf::myRHF(options_, psio_));
     Process::environment.set_wavefunction(rhf_);
-    double Ehf = rhf_->compute_energy();
-    rhf_->J()->scale(0.5);
-    RHF_finalize();
-    return Ehf;
+    try {
+        double Ehf = rhf_->compute_energy();
+        rhf_->J()->scale(0.5);
+        RHF_finalize();
+        return Ehf;
+    }
+    catch (...) {
+        RHF_finalize();
+        rhf_.reset();
+        throw PSIEXCEPTION("RHF: Hartree-Fock possibly not converged.");
+    }
 }
 
 double MatPsi::RHF(SharedMatrix EnvMat) {
@@ -403,10 +410,18 @@ double MatPsi::RHF(SharedMatrix EnvMat) {
     Process::environment.set_molecule(molecule_);
     rhf_ = boost::shared_ptr<scf::myRHF>(new scf::myRHF(options_, psio_));
     Process::environment.set_wavefunction(rhf_);
-    double Ehf = rhf_->compute_energy(EnvMat);
-    rhf_->J()->scale(0.5);
-    RHF_finalize();
-    return Ehf;
+    try {
+        double Ehf = rhf_->compute_energy(EnvMat);
+        rhf_->J()->scale(0.5);
+        RHF_finalize();
+        return Ehf;
+    }
+    catch (...) {
+        RHF_finalize();
+        rhf_.reset();
+        throw PSIEXCEPTION("RHF(env): Hartree-Fock possibly not converged.");
+    }
+    
 }
 
 void MatPsi::RHF_finalize() {
